@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifepro_new/presentation/home/home_screen.dart';
 import 'package:lifepro_new/presentation/providers/providers.dart';
-import 'package:lifepro_new/presentation/providers/theme_provider.dart';
+import 'package:lifepro_new/presentation/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
