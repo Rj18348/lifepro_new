@@ -17,34 +17,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final state = ref.watch(homeControllerProvider);
 
     return Scaffold(
-      body:
-          state.isLoading &&
-              state.points ==
-                  0 // Show loading on initial load only if no data
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(homeControllerProvider.notifier).refresh(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildHeader(context),
-                    const SizedBox(height: 20),
-                    _buildCheckInSection(context, state),
-                    const SizedBox(height: 24),
-                    _buildPlanSection(context, state),
-                    const SizedBox(height: 24),
-                    _buildQuickActions(context, state),
-                    const SizedBox(height: 32),
-                    _buildEmergencyButton(context),
-                    const SizedBox(height: 32), // Bottom padding
-                  ],
+      body: SafeArea(
+        child:
+            state.isLoading &&
+                state.points ==
+                    0 // Show loading on initial load only if no data
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(homeControllerProvider.notifier).refresh(),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  // Reduce top padding so header sits closer to the status bar
+                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHeader(context),
+                      const SizedBox(height: 20),
+                      _buildCheckInSection(context, state),
+                      const SizedBox(height: 24),
+                      _buildPlanSection(context, state),
+                      const SizedBox(height: 24),
+                      _buildQuickActions(context, state),
+                      const SizedBox(height: 32),
+                      _buildEmergencyButton(context),
+                      const SizedBox(height: 32), // Bottom padding
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 
@@ -53,7 +56,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        // No background color so header visually sits on the scaffold
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Row(
