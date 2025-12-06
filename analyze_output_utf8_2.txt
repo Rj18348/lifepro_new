@@ -1,6 +1,0 @@
-﻿Analyzing lifepro_new...                                        
-
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\home\home_screen.dart:143:49 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\home\home_screen.dart:386:62 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\home\home_screen.dart:457:56 - deprecated_member_use
-
