@@ -17,6 +17,43 @@ class SettingsScreen extends ConsumerWidget {
           _buildHeader(context),
           const SizedBox(height: 16),
           _buildAppearanceCard(context, ref, themeMode),
+          const SizedBox(height: 24),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.logout_outlined),
+              title: const Text('Sign Out'),
+              onTap: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Sign Out'),
+                    content: const Text('Are you sure you want to sign out?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('Sign Out'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true) {
+                  // Guard against using the BuildContext after an async gap
+                  if (!context.mounted) return;
+
+                  // Placeholder: perform sign-out logic here, e.g. auth.signOut()
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('Signed out')));
+                  Navigator.of(context).maybePop();
+                }
+              },
+            ),
+          ),
         ],
       ),
     );

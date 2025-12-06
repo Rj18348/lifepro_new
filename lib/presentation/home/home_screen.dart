@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lifepro_new/presentation/screens/settings_screen.dart';
 import 'home_controller.dart';
+import 'package:lifepro_new/presentation/screens/settings_screen.dart';
 import 'home_state.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -12,41 +12,61 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeControllerProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child:
-            state.isLoading &&
-                state.points ==
-                    0 // Show loading on initial load only if no data
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: () =>
-                    ref.read(homeControllerProvider.notifier).refresh(),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  // Reduce top padding so header sits closer to the status bar
-                  padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(context),
-                      const SizedBox(height: 20),
-                      _buildCheckInSection(context, state),
-                      const SizedBox(height: 24),
-                      _buildPlanSection(context, state),
-                      const SizedBox(height: 24),
-                      _buildQuickActions(context, state),
-                      const SizedBox(height: 32),
-                      _buildEmergencyButton(context),
-                      const SizedBox(height: 32), // Bottom padding
-                    ],
-                  ),
+    // Build the home content used for the Home tab
+    final Widget homeContent = SafeArea(
+      child: state.isLoading && state.points == 0
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(homeControllerProvider.notifier).refresh(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                // Reduce top padding so header sits closer to the status bar
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(context),
+                    const SizedBox(height: 20),
+                    _buildCheckInSection(context, state),
+                    const SizedBox(height: 24),
+                    _buildPlanSection(context, state),
+                    const SizedBox(height: 24),
+                    _buildQuickActions(context, state),
+                    const SizedBox(height: 32),
+                    _buildEmergencyButton(context),
+                    const SizedBox(height: 32), // Bottom padding
+                  ],
                 ),
               ),
+            ),
+    );
+
+    return Scaffold(
+      body: _selectedIndex == 0 ? homeContent : _buildProfileScreen(context),
+      bottomNavigationBar: NavigationBar(
+        // Reduce height so the nav bar is less tall
+        height: 70,
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (int index) =>
+            setState(() => _selectedIndex = index),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
@@ -89,17 +109,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 icon: Icons.notifications_none_rounded,
                 onTap: () {
                   // TODO: Open notifications
-                },
-              ),
-              const SizedBox(width: 8),
-              _NotificationDotButton(
-                icon: Icons.settings_outlined,
-                showDot: false,
-                onTap: () {
-                  final route = MaterialPageRoute(
-                    builder: (_) => const SettingsScreen(),
-                  );
-                  Navigator.of(context).push(route);
                 },
               ),
             ],
@@ -171,6 +180,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   horizontal: 24,
                   vertical: 12,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileScreen(BuildContext context) {
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 8),
+            Center(
+              child: CircleAvatar(
+                radius: 40,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.person,
+                  size: 40,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                'Your Name',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'View and edit your profile',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('Settings'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  // Open settings screen
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
+                },
               ),
             ),
           ],
@@ -559,13 +626,7 @@ class _QuickActionCard extends StatelessWidget {
 class _NotificationDotButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  final bool showDot;
-
-  const _NotificationDotButton({
-    required this.icon,
-    required this.onTap,
-    this.showDot = true,
-  });
+  const _NotificationDotButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -585,19 +646,18 @@ class _NotificationDotButton extends StatelessWidget {
             ),
           ),
         ),
-        if (showDot)
-          Positioned(
-            top: -1,
-            right: -1,
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: const BoxDecoration(
-                color: Colors.pinkAccent,
-                shape: BoxShape.circle,
-              ),
+        Positioned(
+          top: -1,
+          right: -1,
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: Colors.pinkAccent,
+              shape: BoxShape.circle,
             ),
           ),
+        ),
       ],
     );
   }
