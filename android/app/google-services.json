@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1047646437670",
+    "project_id": "lifepro-adf43",
+    "storage_bucket": "lifepro-adf43.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047646437670:android:078172d6d9e842bb9341e7",
+        "android_client_info": {
+          "package_name": "com.lifepro.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByIrCCwoJOtjR9hYIPLb6SJXfWpNy06IE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
