@@ -17,27 +17,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final state = ref.watch(homeControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('LifeBalance'),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {
-              // TODO: Open Profile (Local)
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              final route = MaterialPageRoute(
-                builder: (_) => const SettingsScreen(),
-              );
-              Navigator.of(context).push(route);
-            },
-          ),
-        ],
-      ),
       body:
           state.isLoading &&
               state.points ==
@@ -52,6 +31,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    _buildHeader(context),
+                    const SizedBox(height: 20),
                     _buildCheckInSection(context, state),
                     const SizedBox(height: 24),
                     _buildPlanSection(context, state),
@@ -64,6 +45,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Good Morning,",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Frede \ud83d\udc4b",
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              _NotificationDotButton(
+                icon: Icons.notifications_none_rounded,
+                onTap: () {
+                  // TODO: Open notifications
+                },
+              ),
+              const SizedBox(width: 8),
+              _NotificationDotButton(
+                icon: Icons.settings_outlined,
+                showDot: false,
+                onTap: () {
+                  final route = MaterialPageRoute(
+                    builder: (_) => const SettingsScreen(),
+                  );
+                  Navigator.of(context).push(route);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -510,6 +548,53 @@ class _QuickActionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NotificationDotButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool showDot;
+
+  const _NotificationDotButton({
+    required this.icon,
+    required this.onTap,
+    this.showDot = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Material(
+          color: theme.colorScheme.surface,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ),
+        if (showDot)
+          Positioned(
+            top: -1,
+            right: -1,
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: Colors.pinkAccent,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
