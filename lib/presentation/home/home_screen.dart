@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'home_controller.dart';
 import 'home_state.dart';
 
+import '../profile/profile_screen.dart';
+import '../settings/settings_screen.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -23,13 +26,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.account_circle_outlined),
             onPressed: () {
-              // TODO: Open Profile (Local)
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
             },
           ),
+
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              // TODO: Open Settings
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
             },
           ),
         ],
@@ -112,11 +122,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: () {
-                // TODO: Navigate to check-in flow
-                // For demo, we might simulate check-in via controller
+                // Navigate to check-in flow or simulate for demo
                 ref
                     .read(homeControllerProvider.notifier)
                     .completeCheckIn("Good", 3);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Check-in completed!'),
+                    action: SnackBarAction(
+                      label: 'Undo',
+                      onPressed: () {
+                        // Optional: Implement undo logic
+                      },
+                    ),
+                  ),
+                );
               },
               icon: const Icon(Icons.check_circle_outline),
               label: const Text("Start Daily Check-In"),
@@ -232,7 +253,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: "Micro Steps",
                 color: Colors.purple.shade100,
                 onTap: () {
-                  // TODO: Open Library
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Micro Steps Library coming soon!'),
+                    ),
+                  );
                 },
               ),
             ),
@@ -243,7 +268,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: "Journal",
                 color: Colors.orange.shade100,
                 onTap: () {
-                  // TODO: Open Journal
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Journal feature coming soon!'),
+                    ),
+                  );
                 },
               ),
             ),
@@ -415,7 +444,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Center(
       child: TextButton.icon(
         onPressed: () {
-          // TODO: Open Emergency Modal
           showModalBottomSheet(
             context: context,
             builder: (context) => Container(
@@ -484,7 +512,8 @@ class _QuickActionCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      color: theme.colorScheme.surfaceContainerHighest, // Defaults for M3
+      // Use the passed color, possibly mixing with surface
+      color: color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
@@ -493,7 +522,7 @@ class _QuickActionCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 32, color: theme.colorScheme.primary),
+              Icon(icon, size: 32, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(height: 8),
               Text(
                 label,
