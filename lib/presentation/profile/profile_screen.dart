@@ -8,13 +8,58 @@ import 'package:intl/intl.dart';
 import 'package:lifepro_new/domain/entities/user_profile.dart';
 import 'package:lifepro_new/presentation/profile/profile_controller.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  late TextEditingController _fullNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    final profileState = ref.read(profileControllerProvider);
+    _fullNameController = TextEditingController(
+      text: profileState.userProfile.fullName,
+    );
+    _emailController = TextEditingController(
+      text: profileState.userProfile.email,
+    );
+    _phoneController = TextEditingController(
+      text: profileState.userProfile.phoneWithCountryCode,
+    );
+  }
+
+  @override
+  void dispose() {
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profileState = ref.watch(profileControllerProvider);
     final profileController = ref.read(profileControllerProvider.notifier);
+
+    // Update controllers when profile loads or changes externally
+    if (_fullNameController.text != profileState.userProfile.fullName) {
+      _fullNameController.text = profileState.userProfile.fullName ?? '';
+    }
+    if (_emailController.text != profileState.userProfile.email) {
+      _emailController.text = profileState.userProfile.email ?? '';
+    }
+    if (_phoneController.text !=
+        profileState.userProfile.phoneWithCountryCode) {
+      _phoneController.text =
+          profileState.userProfile.phoneWithCountryCode ?? '';
+    }
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -38,7 +83,8 @@ class ProfileScreen extends ConsumerWidget {
                 // Profile Picture Section
                 _ProfilePictureSection(
                   profilePictureUrl: profileState.userProfile.profilePictureUrl,
-                  onPickImage: () => _showImageSourceDialog(context, profileController),
+                  onPickImage: () =>
+                      _showImageSourceDialog(context, profileController),
                 ),
                 const SizedBox(height: 32),
 
@@ -57,7 +103,7 @@ class ProfileScreen extends ConsumerWidget {
                 _ProfileField(
                   label: 'Full Name',
                   icon: Icons.person,
-                  controller: TextEditingController(text: profileState.userProfile.fullName),
+                  controller: _fullNameController,
                   errorText: profileState.fieldErrors?['fullName'],
                   hint: 'Enter your full name',
                   onChanged: profileController.updateFullName,
@@ -66,7 +112,7 @@ class ProfileScreen extends ConsumerWidget {
                 _ProfileField(
                   label: 'Email',
                   icon: Icons.email,
-                  controller: TextEditingController(text: profileState.userProfile.email),
+                  controller: _emailController,
                   errorText: profileState.fieldErrors?['email'],
                   hint: 'Enter your email',
                   onChanged: profileController.updateEmail,
@@ -75,7 +121,7 @@ class ProfileScreen extends ConsumerWidget {
                 _ProfileField(
                   label: 'Phone Number',
                   icon: Icons.phone,
-                  controller: TextEditingController(text: profileState.userProfile.phoneWithCountryCode),
+                  controller: _phoneController,
                   errorText: profileState.fieldErrors?['phone'],
                   hint: '+91 9876543210',
                   onChanged: profileController.updatePhone,
@@ -170,7 +216,9 @@ class ProfileScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Profile Updated Successfully',
-                        style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -186,7 +234,10 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showImageSourceDialog(BuildContext context, ProfileController controller) {
+  void _showImageSourceDialog(
+    BuildContext context,
+    ProfileController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -237,8 +288,9 @@ class _ProfilePictureSection extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           backgroundImage: profilePictureUrl != null
               ? (profilePictureUrl!.startsWith('http')
-                  ? CachedNetworkImageProvider(profilePictureUrl!)
-                  : FileImage(File(profilePictureUrl!))) as ImageProvider?
+                        ? CachedNetworkImageProvider(profilePictureUrl!)
+                        : FileImage(File(profilePictureUrl!)))
+                    as ImageProvider?
               : null,
           child: profilePictureUrl == null
               ? const Icon(Icons.person, size: 60, color: Colors.grey)
@@ -297,9 +349,7 @@ class _ProfileFieldState extends State<_ProfileField> {
           hintText: widget.hint,
           errorText: widget.errorText,
           prefixIcon: Icon(widget.icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: theme.colorScheme.surfaceContainerHighest,
         ),
@@ -308,8 +358,6 @@ class _ProfileFieldState extends State<_ProfileField> {
       ),
     );
   }
-
-
 }
 
 class _DatePickerField extends StatelessWidget {
@@ -351,12 +399,16 @@ class _DatePickerField extends StatelessWidget {
               suffixIcon: const Icon(Icons.calendar_today),
             ),
             controller: TextEditingController(
-              text: selectedDate != null ? DateFormat('yyyy-MM-dd').format(selectedDate!) : '',
+              text: selectedDate != null
+                  ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+                  : '',
             ),
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
-                initialDate: selectedDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
+                initialDate:
+                    selectedDate ??
+                    DateTime.now().subtract(const Duration(days: 365 * 18)),
                 firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
               );
@@ -365,15 +417,16 @@ class _DatePickerField extends StatelessWidget {
               }
             },
           ),
-          if (ageText.isNotEmpty) Padding(
-            padding: const EdgeInsets.only(left: 16, top: 4),
-            child: Text(
-              ageText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.primary,
+          if (ageText.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 4),
+              child: Text(
+                ageText,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -405,9 +458,7 @@ class _GenderDropdown extends StatelessWidget {
           labelText: label,
           errorText: errorText,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: theme.colorScheme.surfaceContainerHighest,
         ),
@@ -484,7 +535,8 @@ class _OtpDialogState extends State<_OtpDialog> {
               keyboardType: TextInputType.number,
               maxLength: 6,
             ),
-            if (widget.error != null) Text(widget.error!, style: const TextStyle(color: Colors.red)),
+            if (widget.error != null)
+              Text(widget.error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -495,8 +547,12 @@ class _OtpDialogState extends State<_OtpDialog> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: widget.isLoading ? null : () => widget.onVerify(_otpController.text),
-                  child: widget.isLoading ? const CircularProgressIndicator() : const Text('Verify'),
+                  onPressed: widget.isLoading
+                      ? null
+                      : () => widget.onVerify(_otpController.text),
+                  child: widget.isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Verify'),
                 ),
               ],
             ),
@@ -536,15 +592,14 @@ class _EmailVerificationDialog extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text('A verification email has been sent to your email address.'),
+            const Text(
+              'A verification email has been sent to your email address.',
+            ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: onClose,
-                  child: const Text('Cancel'),
-                ),
+                TextButton(onPressed: onClose, child: const Text('Cancel')),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: onVerify,
