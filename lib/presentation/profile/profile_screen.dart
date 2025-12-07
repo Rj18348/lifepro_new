@@ -287,6 +287,7 @@ class _ProfileFieldState extends State<_ProfileField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
@@ -307,6 +308,8 @@ class _ProfileFieldState extends State<_ProfileField> {
       ),
     );
   }
+
+
 }
 
 class _DatePickerField extends StatelessWidget {

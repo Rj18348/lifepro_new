@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:lifepro_new/presentation/home/home_screen.dart';
 import 'package:lifepro_new/presentation/providers/providers.dart';
 import 'package:lifepro_new/presentation/theme/app_theme.dart';
@@ -30,6 +31,18 @@ class MyApp extends ConsumerWidget {
             const Scaffold(body: Center(child: CircularProgressIndicator())),
         error: (e, st) => Scaffold(body: Center(child: Text('Error: $e'))),
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'), // English
+        Locale('ar', 'SA'), // Arabic
+        Locale('he', 'IL'), // Hebrew
+        Locale('ur', 'PK'), // Urdu
+        Locale('fa', 'IR'), // Persian
+      ],
       builder: (context, child) {
         // Resolve the effective brightness when ThemeMode.system is selected
         final Brightness resolved = themeMode == ThemeMode.system
