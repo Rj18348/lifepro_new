@@ -53,170 +53,166 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Profile Picture Section
-                _ProfilePictureSection(
-                  profilePictureUrl: profileState.userProfile.profilePictureUrl,
-                  onPickImage: () =>
-                      _showImageSourceDialog(context, profileController),
-                ),
-                const SizedBox(height: 32),
-
-                // Basic Details Section
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Basic Details",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Profile Picture Section
+                  _ProfilePictureSection(
+                    profilePictureUrl:
+                        profileState.userProfile.profilePictureUrl,
+                    onPickImage: () =>
+                        _showImageSourceDialog(context, profileController),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _ProfileField(
-                  label: 'Full Name',
-                  icon: Icons.person,
-                  controller: _fullNameController,
-                  errorText: profileState.fieldErrors?['fullName'],
-                  hint: 'Enter your full name',
-                  onChanged: profileController.updateFullName,
-                  keyboardType: TextInputType.name,
-                ),
-                _ProfileField(
-                  label: 'Email',
-                  icon: Icons.email,
-                  controller: _emailController,
-                  errorText: profileState.fieldErrors?['email'],
-                  hint: 'Enter your email',
-                  onChanged: profileController.updateEmail,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                _ProfileField(
-                  label: 'Phone Number',
-                  icon: Icons.phone,
-                  controller: _phoneController,
-                  errorText: profileState.fieldErrors?['phone'],
-                  hint: '+91 9876543210',
-                  onChanged: profileController.updatePhone,
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                // Personal Section
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Personal",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _DatePickerField(
-                  label: 'Date of Birth',
-                  icon: Icons.calendar_today,
-                  selectedDate: profileState.userProfile.dob,
-                  onChanged: profileController.updateDob,
-                  ageText: profileController.ageDisplay,
-                  errorText: profileState.fieldErrors?['dob'],
-                ),
-                _GenderDropdown(
-                  label: 'Gender',
-                  icon: Icons.wc,
-                  selectedGender: profileState.userProfile.gender,
-                  onChanged: profileController.updateGender,
-                  errorText: profileState.fieldErrors?['gender'],
-                ),
-                const SizedBox(height: 40),
-
-                // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: profileController.isFormValid
-                        ? profileController.saveProfile
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  // Basic Details Section
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Basic Details",
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
                       ),
                     ),
-                    child: profileState.isSaving
-                        ? const CircularProgressIndicator()
-                        : const Text('Save Profile'),
                   ),
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 16),
+                  _ProfileField(
+                    label: 'Full Name',
+                    icon: Icons.person,
+                    controller: _fullNameController,
+                    errorText: profileState.fieldErrors?['fullName'],
+                    hint: 'Enter your full name',
+                    onChanged: profileController.updateFullName,
+                    keyboardType: TextInputType.name,
+                  ),
+                  _ProfileField(
+                    label: 'Email',
+                    icon: Icons.email,
+                    controller: _emailController,
+                    errorText: profileState.fieldErrors?['email'],
+                    hint: 'Enter your email',
+                    onChanged: profileController.updateEmail,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  _ProfileField(
+                    label: 'Phone Number',
+                    icon: Icons.phone,
+                    controller: _phoneController,
+                    errorText: profileState.fieldErrors?['phone'],
+                    hint: '+91 9876543210',
+                    onChanged: profileController.updatePhone,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 32),
 
-          // OTP Dialog
-          if (profileState.showOtpDialog)
-            _OtpDialog(
-              onVerify: (otp) => profileController.verifyOtp(otp),
-              onClose: profileController.closeOtpDialog,
-              isLoading: false,
-              error: profileState.errorMessage,
-            ),
+                  // Personal Section
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Personal",
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _DatePickerField(
+                    label: 'Date of Birth',
+                    icon: Icons.calendar_today,
+                    selectedDate: profileState.userProfile.dob,
+                    onChanged: profileController.updateDob,
+                    ageText: profileController.ageDisplay,
+                    errorText: profileState.fieldErrors?['dob'],
+                  ),
+                  _GenderDropdown(
+                    label: 'Gender',
+                    icon: Icons.wc,
+                    selectedGender: profileState.userProfile.gender,
+                    onChanged: profileController.updateGender,
+                    errorText: profileState.fieldErrors?['gender'],
+                  ),
+                  const SizedBox(height: 40),
 
-          // Email Verification Dialog
-          if (profileState.showEmailVerificationDialog)
-            _EmailVerificationDialog(
-              onVerify: profileController.verifyEmail,
-              onClose: profileController.closeEmailDialog,
-            ),
-
-          // Success Popup
-          if (profileState.profileSaved)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Profile Updated Successfully',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
+                  // Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: profileController.isFormValid
+                          ? profileController.saveProfile
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                      child: profileState.isSaving
+                          ? const CircularProgressIndicator()
+                          : const Text('Save Profile'),
                     ),
-                    IconButton(
-                      onPressed: profileController.dismissSuccess,
-                      icon: const Icon(Icons.close, color: Colors.white),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
-        ],
+
+            // OTP Dialog
+            if (profileState.showOtpDialog)
+              _OtpDialog(
+                onVerify: (otp) => profileController.verifyOtp(otp),
+                onClose: profileController.closeOtpDialog,
+                isLoading: false,
+                error: profileState.errorMessage,
+              ),
+
+            // Email Verification Dialog
+            if (profileState.showEmailVerificationDialog)
+              _EmailVerificationDialog(
+                onVerify: profileController.verifyEmail,
+                onClose: profileController.closeEmailDialog,
+              ),
+
+            // Success Popup
+            if (profileState.profileSaved)
+              Positioned(
+                bottom: 20,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Profile Updated Successfully',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: profileController.dismissSuccess,
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
