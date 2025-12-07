@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lifepro_new/domain/entities/user_profile.dart';
 import 'package:lifepro_new/presentation/profile/profile_controller.dart';
@@ -29,14 +33,24 @@ class ProfileScreen extends ConsumerWidget {
           SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // Profile Picture Section
+                _ProfilePictureSection(
+                  profilePictureUrl: profileState.userProfile.profilePictureUrl,
+                  onPickImage: () => _showImageSourceDialog(context, profileController),
+                ),
+                const SizedBox(height: 32),
+
                 // Basic Details Section
-                Text(
-                  "Basic Details",
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Basic Details",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -70,11 +84,14 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 32),
 
                 // Personal Section
-                Text(
-                  "Personal",
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Personal",
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -166,6 +183,79 @@ class ProfileScreen extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+
+  void _showImageSourceDialog(BuildContext context, ProfileController controller) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickProfilePicture(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickProfilePicture(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProfilePictureSection extends StatelessWidget {
+  final String? profilePictureUrl;
+  final VoidCallback onPickImage;
+
+  const _ProfilePictureSection({
+    required this.profilePictureUrl,
+    required this.onPickImage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          backgroundImage: profilePictureUrl != null
+              ? (profilePictureUrl!.startsWith('http')
+                  ? CachedNetworkImageProvider(profilePictureUrl!)
+                  : FileImage(File(profilePictureUrl!))) as ImageProvider?
+              : null,
+          child: profilePictureUrl == null
+              ? const Icon(Icons.person, size: 60, color: Colors.grey)
+              : null,
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: IconButton(
+              icon: const Icon(Icons.camera_alt, color: Colors.white),
+              onPressed: onPickImage,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -263,7 +353,7 @@ class _DatePickerField extends StatelessWidget {
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
-                initialDate: selectedDate ?? DateTime.now().subtract(const Duration(days: 365*18)),
+                initialDate: selectedDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
                 firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
               );

@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:lifepro_new/domain/entities/user_profile.dart';
 import 'package:lifepro_new/presentation/profile/profile_state.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProfileController extends StateNotifier<ProfileState> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
@@ -86,6 +89,67 @@ class ProfileController extends StateNotifier<ProfileState> {
     _validateField('gender');
   }
 
+  void updateProfilePicture(String? profilePictureUrl) {
+    final newProfile = state.userProfile.copyWith(profilePictureUrl: profilePictureUrl);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  void updateNickname(String nickname) {
+    final newProfile = state.userProfile.copyWith(nickname: nickname);
+    state = state.copyWith(userProfile: newProfile);
+    _validateField('nickname');
+  }
+
+  void updateBio(String bio) {
+    final newProfile = state.userProfile.copyWith(bio: bio);
+    state = state.copyWith(userProfile: newProfile);
+    _validateField('bio');
+  }
+
+  void updateOccupation(String? occupation) {
+    final newProfile = state.userProfile.copyWith(occupation: occupation);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  void updateCountry(String? country) {
+    final newProfile = state.userProfile.copyWith(country: country);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  void updateCity(String? city) {
+    final newProfile = state.userProfile.copyWith(city: city);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  void updateTimezone(String? timezone) {
+    final newProfile = state.userProfile.copyWith(timezone: timezone);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  Future<void> pickProfilePicture(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        // For now, we'll save the file path locally
+        // In production, you might want to upload to cloud storage
+        final directory = await getApplicationDocumentsDirectory();
+        final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savedImage = await File(pickedFile.path).copy('${directory.path}/$fileName');
+
+        updateProfilePicture(savedImage.path);
+      }
+    } catch (e) {
+      state = state.copyWith(errorMessage: 'Failed to pick image: $e');
+    }
+  }
+
   void _validateField(String field) {
     final errors = Map<String, String>.from(state.fieldErrors ?? {});
     switch (field) {
@@ -135,6 +199,16 @@ class ProfileController extends StateNotifier<ProfileState> {
           errors['gender'] = 'Please select your gender.';
         } else {
           errors.remove('gender');
+        }
+        break;
+      case 'nickname':
+        // Optional field, no validation required
+        break;
+      case 'bio':
+        if (state.userProfile.bio.length > 200) {
+          errors['bio'] = 'Bio must be less than 200 characters.';
+        } else {
+          errors.remove('bio');
         }
         break;
     }

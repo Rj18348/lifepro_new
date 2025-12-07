@@ -24,6 +24,14 @@ class UserProfile with _$UserProfile {
     Gender? gender,
     @Default(false) bool emailVerified,
     @Default(false) bool phoneVerified,
+    // Phase 1: Extended profile information
+    String? profilePictureUrl,
+    @Default('') String nickname,
+    @Default('') String bio,
+    String? occupation,
+    String? country,
+    String? city,
+    String? timezone,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>

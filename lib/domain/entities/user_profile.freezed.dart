@@ -27,7 +27,15 @@ mixin _$UserProfile {
   DateTime? get dob => throw _privateConstructorUsedError;
   Gender? get gender => throw _privateConstructorUsedError;
   bool get emailVerified => throw _privateConstructorUsedError;
-  bool get phoneVerified => throw _privateConstructorUsedError;
+  bool get phoneVerified =>
+      throw _privateConstructorUsedError; // Phase 1: Extended profile information
+  String? get profilePictureUrl => throw _privateConstructorUsedError;
+  String get nickname => throw _privateConstructorUsedError;
+  String get bio => throw _privateConstructorUsedError;
+  String? get occupation => throw _privateConstructorUsedError;
+  String? get country => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  String? get timezone => throw _privateConstructorUsedError;
 
   /// Serializes this UserProfile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,6 +62,13 @@ abstract class $UserProfileCopyWith<$Res> {
     Gender? gender,
     bool emailVerified,
     bool phoneVerified,
+    String? profilePictureUrl,
+    String nickname,
+    String bio,
+    String? occupation,
+    String? country,
+    String? city,
+    String? timezone,
   });
 }
 
@@ -79,6 +94,13 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
     Object? gender = freezed,
     Object? emailVerified = null,
     Object? phoneVerified = null,
+    Object? profilePictureUrl = freezed,
+    Object? nickname = null,
+    Object? bio = null,
+    Object? occupation = freezed,
+    Object? country = freezed,
+    Object? city = freezed,
+    Object? timezone = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -110,6 +132,34 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
                 ? _value.phoneVerified
                 : phoneVerified // ignore: cast_nullable_to_non_nullable
                       as bool,
+            profilePictureUrl: freezed == profilePictureUrl
+                ? _value.profilePictureUrl
+                : profilePictureUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            nickname: null == nickname
+                ? _value.nickname
+                : nickname // ignore: cast_nullable_to_non_nullable
+                      as String,
+            bio: null == bio
+                ? _value.bio
+                : bio // ignore: cast_nullable_to_non_nullable
+                      as String,
+            occupation: freezed == occupation
+                ? _value.occupation
+                : occupation // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            country: freezed == country
+                ? _value.country
+                : country // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            city: freezed == city
+                ? _value.city
+                : city // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            timezone: freezed == timezone
+                ? _value.timezone
+                : timezone // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -133,6 +183,13 @@ abstract class _$$UserProfileImplCopyWith<$Res>
     Gender? gender,
     bool emailVerified,
     bool phoneVerified,
+    String? profilePictureUrl,
+    String nickname,
+    String bio,
+    String? occupation,
+    String? country,
+    String? city,
+    String? timezone,
   });
 }
 
@@ -157,6 +214,13 @@ class __$$UserProfileImplCopyWithImpl<$Res>
     Object? gender = freezed,
     Object? emailVerified = null,
     Object? phoneVerified = null,
+    Object? profilePictureUrl = freezed,
+    Object? nickname = null,
+    Object? bio = null,
+    Object? occupation = freezed,
+    Object? country = freezed,
+    Object? city = freezed,
+    Object? timezone = freezed,
   }) {
     return _then(
       _$UserProfileImpl(
@@ -188,6 +252,34 @@ class __$$UserProfileImplCopyWithImpl<$Res>
             ? _value.phoneVerified
             : phoneVerified // ignore: cast_nullable_to_non_nullable
                   as bool,
+        profilePictureUrl: freezed == profilePictureUrl
+            ? _value.profilePictureUrl
+            : profilePictureUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        nickname: null == nickname
+            ? _value.nickname
+            : nickname // ignore: cast_nullable_to_non_nullable
+                  as String,
+        bio: null == bio
+            ? _value.bio
+            : bio // ignore: cast_nullable_to_non_nullable
+                  as String,
+        occupation: freezed == occupation
+            ? _value.occupation
+            : occupation // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        country: freezed == country
+            ? _value.country
+            : country // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        city: freezed == city
+            ? _value.city
+            : city // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        timezone: freezed == timezone
+            ? _value.timezone
+            : timezone // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -204,6 +296,13 @@ class _$UserProfileImpl implements _UserProfile {
     this.gender,
     this.emailVerified = false,
     this.phoneVerified = false,
+    this.profilePictureUrl,
+    this.nickname = '',
+    this.bio = '',
+    this.occupation,
+    this.country,
+    this.city,
+    this.timezone,
   });
 
   factory _$UserProfileImpl.fromJson(Map<String, dynamic> json) =>
@@ -228,10 +327,27 @@ class _$UserProfileImpl implements _UserProfile {
   @override
   @JsonKey()
   final bool phoneVerified;
+  // Phase 1: Extended profile information
+  @override
+  final String? profilePictureUrl;
+  @override
+  @JsonKey()
+  final String nickname;
+  @override
+  @JsonKey()
+  final String bio;
+  @override
+  final String? occupation;
+  @override
+  final String? country;
+  @override
+  final String? city;
+  @override
+  final String? timezone;
 
   @override
   String toString() {
-    return 'UserProfile(fullName: $fullName, email: $email, phoneWithCountryCode: $phoneWithCountryCode, dob: $dob, gender: $gender, emailVerified: $emailVerified, phoneVerified: $phoneVerified)';
+    return 'UserProfile(fullName: $fullName, email: $email, phoneWithCountryCode: $phoneWithCountryCode, dob: $dob, gender: $gender, emailVerified: $emailVerified, phoneVerified: $phoneVerified, profilePictureUrl: $profilePictureUrl, nickname: $nickname, bio: $bio, occupation: $occupation, country: $country, city: $city, timezone: $timezone)';
   }
 
   @override
@@ -249,7 +365,18 @@ class _$UserProfileImpl implements _UserProfile {
             (identical(other.emailVerified, emailVerified) ||
                 other.emailVerified == emailVerified) &&
             (identical(other.phoneVerified, phoneVerified) ||
-                other.phoneVerified == phoneVerified));
+                other.phoneVerified == phoneVerified) &&
+            (identical(other.profilePictureUrl, profilePictureUrl) ||
+                other.profilePictureUrl == profilePictureUrl) &&
+            (identical(other.nickname, nickname) ||
+                other.nickname == nickname) &&
+            (identical(other.bio, bio) || other.bio == bio) &&
+            (identical(other.occupation, occupation) ||
+                other.occupation == occupation) &&
+            (identical(other.country, country) || other.country == country) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.timezone, timezone) ||
+                other.timezone == timezone));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -263,6 +390,13 @@ class _$UserProfileImpl implements _UserProfile {
     gender,
     emailVerified,
     phoneVerified,
+    profilePictureUrl,
+    nickname,
+    bio,
+    occupation,
+    country,
+    city,
+    timezone,
   );
 
   /// Create a copy of UserProfile
@@ -288,6 +422,13 @@ abstract class _UserProfile implements UserProfile {
     final Gender? gender,
     final bool emailVerified,
     final bool phoneVerified,
+    final String? profilePictureUrl,
+    final String nickname,
+    final String bio,
+    final String? occupation,
+    final String? country,
+    final String? city,
+    final String? timezone,
   }) = _$UserProfileImpl;
 
   factory _UserProfile.fromJson(Map<String, dynamic> json) =
@@ -306,7 +447,21 @@ abstract class _UserProfile implements UserProfile {
   @override
   bool get emailVerified;
   @override
-  bool get phoneVerified;
+  bool get phoneVerified; // Phase 1: Extended profile information
+  @override
+  String? get profilePictureUrl;
+  @override
+  String get nickname;
+  @override
+  String get bio;
+  @override
+  String? get occupation;
+  @override
+  String? get country;
+  @override
+  String? get city;
+  @override
+  String? get timezone;
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.

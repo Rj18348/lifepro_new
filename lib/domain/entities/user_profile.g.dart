@@ -15,6 +15,13 @@ _$UserProfileImpl _$$UserProfileImplFromJson(Map<String, dynamic> json) =>
       gender: $enumDecodeNullable(_$GenderEnumMap, json['gender']),
       emailVerified: json['emailVerified'] as bool? ?? false,
       phoneVerified: json['phoneVerified'] as bool? ?? false,
+      profilePictureUrl: json['profilePictureUrl'] as String?,
+      nickname: json['nickname'] as String? ?? '',
+      bio: json['bio'] as String? ?? '',
+      occupation: json['occupation'] as String?,
+      country: json['country'] as String?,
+      city: json['city'] as String?,
+      timezone: json['timezone'] as String?,
     );
 
 Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
@@ -26,6 +33,13 @@ Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
       'gender': _$GenderEnumMap[instance.gender],
       'emailVerified': instance.emailVerified,
       'phoneVerified': instance.phoneVerified,
+      'profilePictureUrl': instance.profilePictureUrl,
+      'nickname': instance.nickname,
+      'bio': instance.bio,
+      'occupation': instance.occupation,
+      'country': instance.country,
+      'city': instance.city,
+      'timezone': instance.timezone,
     };
 
 const _$GenderEnumMap = {
