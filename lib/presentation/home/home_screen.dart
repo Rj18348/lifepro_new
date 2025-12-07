@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'home_controller.dart';
 import 'package:lifepro_new/presentation/screens/settings_screen.dart';
+import 'package:lifepro_new/presentation/screens/health_monitoring_screen.dart';
+import 'package:lifepro_new/presentation/screens/reports_screen.dart';
+import 'package:lifepro_new/presentation/screens/care_screen.dart';
 import 'home_state.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -48,7 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     return Scaffold(
-      body: _selectedIndex == 0 ? homeContent : _buildProfileScreen(context),
+      body: _getSelectedScreen(_selectedIndex, homeContent),
       bottomNavigationBar: NavigationBar(
         // Reduce height so the nav bar is less tall
         height: 70,
@@ -62,6 +65,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             label: 'Home',
           ),
           NavigationDestination(
+            icon: Icon(Icons.monitor_heart_outlined),
+            selectedIcon: Icon(Icons.monitor_heart),
+            label: 'Health',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.medical_services_outlined),
+            selectedIcon: Icon(Icons.medical_services),
+            label: 'Care',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Profile',
@@ -69,6 +82,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _getSelectedScreen(int index, Widget homeContent) {
+    switch (index) {
+      case 0:
+        return homeContent;
+      case 1:
+        return const HealthMonitoringScreen();
+      case 2:
+        return const CareScreen();
+      case 3:
+        return _buildProfileScreen(context);
+      default:
+        return homeContent;
+    }
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -191,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildProfileScreen(BuildContext context) {
     final theme = Theme.of(context);
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -227,13 +255,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(height: 24),
+
+            // Reports Section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'My Reports',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const ReportsScreen()),
+                    );
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const ReportsScreen(),
+            const SizedBox(height: 24),
+
+            // Settings
+            Text(
+              'Settings',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.settings_outlined),
-                title: const Text('Settings'),
+                title: const Text('App Settings'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
-                  // Open settings screen
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const SettingsScreen()),
                   );
