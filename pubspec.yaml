@@ -24,6 +24,7 @@ dependencies:
   lottie: ^3.3.2
   google_fonts: ^6.3.3
   flutter_animate: ^4.5.2
+  connectivity_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -33,12 +34,22 @@ dev_dependencies:
   freezed: ^2.5.7
   json_serializable: ^6.9.0
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.3
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/image/logo/logo.png"
   min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#071B1B"
+  image: assets/image/logo/logo.png
+  android_12:
+    color: "#071B1B"
+    image: assets/image/logo/logo.png
+  ios: true
+  web: false
 
 flutter:
   uses-material-design: true

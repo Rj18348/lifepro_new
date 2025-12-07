@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lifepro_new/presentation/providers/theme_provider.dart';
+import 'package:lifepro_new/presentation/theme/app_theme.dart';
 
 class TestWellbeingScreen extends ConsumerStatefulWidget {
   const TestWellbeingScreen({super.key});

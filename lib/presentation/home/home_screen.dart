@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'home_controller.dart';
+import 'package:lifepro_new/presentation/screens/settings_screen.dart';
 import 'home_state.dart';
-
-import '../profile/profile_screen.dart';
-import '../settings/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -14,50 +12,27 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeControllerProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('LifeBalance'),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_circle_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-          ),
-
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body:
-          state.isLoading &&
-              state.points ==
-                  0 // Show loading on initial load only if no data
+    // Build the home content used for the Home tab
+    final Widget homeContent = SafeArea(
+      child: state.isLoading && state.points == 0
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () =>
                   ref.read(homeControllerProvider.notifier).refresh(),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
+                // Reduce top padding so header sits closer to the status bar
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    _buildHeader(context),
+                    const SizedBox(height: 20),
                     _buildCheckInSection(context, state),
                     const SizedBox(height: 24),
                     _buildPlanSection(context, state),
@@ -70,6 +45,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
+    );
+
+    return Scaffold(
+      body: _selectedIndex == 0 ? homeContent : _buildProfileScreen(context),
+      bottomNavigationBar: NavigationBar(
+        // Reduce height so the nav bar is less tall
+        height: 70,
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (int index) =>
+            setState(() => _selectedIndex = index),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        // No background color so header visually sits on the scaffold
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Good Morning,",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Frede \ud83d\udc4b",
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              _NotificationDotButton(
+                icon: Icons.notifications_none_rounded,
+                onTap: () {
+                  // TODO: Open notifications
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -122,22 +167,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: () {
-                // Navigate to check-in flow or simulate for demo
+                // TODO: Navigate to check-in flow
+                // For demo, we might simulate check-in via controller
                 ref
                     .read(homeControllerProvider.notifier)
                     .completeCheckIn("Good", 3);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Check-in completed!'),
-                    action: SnackBarAction(
-                      label: 'Undo',
-                      onPressed: () {
-                        // Optional: Implement undo logic
-                      },
-                    ),
-                  ),
-                );
               },
               icon: const Icon(Icons.check_circle_outline),
               label: const Text("Start Daily Check-In"),
@@ -146,6 +180,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   horizontal: 24,
                   vertical: 12,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileScreen(BuildContext context) {
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 8),
+            Center(
+              child: CircleAvatar(
+                radius: 40,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.person,
+                  size: 40,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                'Your Name',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'View and edit your profile',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.settings_outlined),
+                title: const Text('Settings'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  // Open settings screen
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
+                },
               ),
             ),
           ],
@@ -169,9 +261,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.lock_outline,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.lock_outline,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  size: 24,
+                ),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -253,11 +363,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: "Micro Steps",
                 color: Colors.purple.shade100,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Micro Steps Library coming soon!'),
-                    ),
-                  );
+                  // TODO: Open Library
                 },
               ),
             ),
@@ -268,11 +374,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: "Journal",
                 color: Colors.orange.shade100,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Journal feature coming soon!'),
-                    ),
-                  );
+                  // TODO: Open Journal
                 },
               ),
             ),
@@ -444,6 +546,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Center(
       child: TextButton.icon(
         onPressed: () {
+          // TODO: Open Emergency Modal
           showModalBottomSheet(
             context: context,
             builder: (context) => Container(
@@ -512,8 +615,7 @@ class _QuickActionCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      // Use the passed color, possibly mixing with surface
-      color: color,
+      color: theme.colorScheme.surfaceContainerHighest, // Defaults for M3
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
@@ -522,7 +624,7 @@ class _QuickActionCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 32, color: theme.colorScheme.onSurfaceVariant),
+              Icon(icon, size: 32, color: theme.colorScheme.primary),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -535,6 +637,46 @@ class _QuickActionCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _NotificationDotButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _NotificationDotButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Material(
+          color: theme.colorScheme.surface,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ),
+        Positioned(
+          top: -1,
+          right: -1,
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: const BoxDecoration(
+              color: Colors.pinkAccent,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

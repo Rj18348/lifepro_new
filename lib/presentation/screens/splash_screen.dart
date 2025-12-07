@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifepro_new/presentation/providers/providers.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   final VoidCallback onComplete;
@@ -19,6 +20,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _init() async {
+    // Check internet connectivity
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final hasInternet =
+        connectivityResult.contains(ConnectivityResult.mobile) ||
+        connectivityResult.contains(ConnectivityResult.wifi) ||
+        connectivityResult.contains(ConnectivityResult.ethernet);
+
     // Wait for both minimum time (3 seconds) and app initialization
     await Future.wait([
       Future.delayed(const Duration(seconds: 3)),
@@ -26,6 +34,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     ]);
 
     if (mounted) {
+      // Show snackbar if no internet
+      if (!hasInternet) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No internet connection available'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
       widget.onComplete();
     }
   }
