@@ -30,11 +30,11 @@ class CareScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Emergency Support Card
-            _buildEmergencySupportCard(theme),
+            _buildEmergencySupportCard(theme, context),
             const SizedBox(height: 16),
 
             // Next Appointment
-            _buildNextAppointmentCard(theme),
+            _buildNextAppointmentCard(theme, context),
             const SizedBox(height: 24),
 
             // Support Options
@@ -45,7 +45,7 @@ class CareScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            _buildSupportOptions(theme),
+            _buildSupportOptions(theme, context),
             const SizedBox(height: 24),
 
             // Resources
@@ -63,7 +63,7 @@ class CareScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmergencySupportCard(ThemeData theme) {
+  Widget _buildEmergencySupportCard(ThemeData theme, BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -109,9 +109,13 @@ class CareScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Call emergency number
-                  },
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Emergency hotline coming soon'),
+                    ),
+                  );
+                },
                   icon: const Icon(Icons.phone),
                   label: const Text("Call Hotline"),
                   style: ElevatedButton.styleFrom(
@@ -128,7 +132,11 @@ class CareScreen extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: Open chat
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Emergency chat coming soon'),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.chat),
                   label: const Text("Chat Now"),
@@ -149,7 +157,7 @@ class CareScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNextAppointmentCard(ThemeData theme) {
+  Widget _buildNextAppointmentCard(ThemeData theme, BuildContext context) {
     return Card(
       elevation: 0,
       color: theme.colorScheme.secondaryContainer,
@@ -238,7 +246,11 @@ class CareScreen extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
-                  // TODO: View appointment details
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Appointment details coming soon'),
+                    ),
+                  );
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: theme.colorScheme.onSecondaryContainer,
@@ -261,7 +273,7 @@ class CareScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSupportOptions(ThemeData theme) {
+  Widget _buildSupportOptions(ThemeData theme, BuildContext context) {
     return Column(
       children: [
         _buildSupportOption(
@@ -270,6 +282,7 @@ class CareScreen extends StatelessWidget {
           "Video Consultation",
           "Connect with a therapist online",
           Colors.blue,
+          context,
         ),
         const SizedBox(height: 12),
         _buildSupportOption(
@@ -278,6 +291,7 @@ class CareScreen extends StatelessWidget {
           "Text Therapy",
           "Message a counselor anytime",
           Colors.green,
+          context,
         ),
         const SizedBox(height: 12),
         _buildSupportOption(
@@ -286,6 +300,7 @@ class CareScreen extends StatelessWidget {
           "Support Groups",
           "Join community discussions",
           Colors.purple,
+          context,
         ),
         const SizedBox(height: 12),
         _buildSupportOption(
@@ -294,6 +309,7 @@ class CareScreen extends StatelessWidget {
           "Self-Help Articles",
           "Read expert guidance",
           Colors.orange,
+          context,
         ),
       ],
     );
@@ -305,6 +321,7 @@ class CareScreen extends StatelessWidget {
     String title,
     String subtitle,
     Color color,
+    BuildContext context,
   ) {
     return Card(
       elevation: 0,
@@ -337,7 +354,11 @@ class CareScreen extends StatelessWidget {
           color: theme.colorScheme.onSurfaceVariant,
         ),
         onTap: () {
-          // TODO: Navigate to support option
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${title.replaceAll(' ', '').toLowerCase()} coming soon'),
+            ),
+          );
         },
       ),
     );

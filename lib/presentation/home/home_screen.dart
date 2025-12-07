@@ -5,6 +5,7 @@ import 'package:lifepro_new/presentation/screens/settings_screen.dart';
 import 'package:lifepro_new/presentation/screens/health_monitoring_screen.dart';
 import 'package:lifepro_new/presentation/screens/reports_screen.dart';
 import 'package:lifepro_new/presentation/screens/care_screen.dart';
+import 'package:lifepro_new/presentation/screens/notifications_screen.dart';
 import 'home_state.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -138,7 +139,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _NotificationDotButton(
           icon: Icons.notifications_none_rounded,
           onTap: () {
-            // TODO: Open notifications
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+            );
           },
         ),
       ],
@@ -166,7 +169,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 color: theme.colorScheme.secondaryContainer,
                 onColor: theme.colorScheme.onSecondaryContainer,
                 onTap: () {
-                  // TODO: Navigate to hang out activities
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Hang out activities coming soon'),
+                    ),
+                  );
                 },
               ),
             ),
@@ -178,7 +185,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 color: theme.colorScheme.tertiaryContainer,
                 onColor: theme.colorScheme.onTertiaryContainer,
                 onTap: () {
-                  // TODO: Navigate to laugh activities
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Laugh activities coming soon'),
+                    ),
+                  );
                 },
               ),
             ),
@@ -420,7 +431,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               IconButton(
                 icon: const Icon(Icons.add_circle_outline),
                 onPressed: () {
-                  // TODO: Add new task
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Add new task functionality coming soon'),
+                    ),
+                  );
                 },
                 color: theme.colorScheme.primary,
               ),
@@ -710,7 +725,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Center(
       child: TextButton.icon(
         onPressed: () {
-          // TODO: Open Emergency Modal
           showModalBottomSheet(
             context: context,
             builder: (context) => Container(
