@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:lifepro_new/domain/entities/user_profile.dart';
+import 'package:lifepro_new/presentation/profile/profile_controller.dart';
+import 'package:lifepro_new/presentation/profile/profile_state.dart';
 import '../providers/theme_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -7,6 +11,8 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(profileControllerProvider);
+    final profileController = ref.read(profileControllerProvider.notifier);
     final themeMode = ref.watch(themeProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -20,241 +26,440 @@ class ProfileScreen extends ConsumerWidget {
         elevation: 0,
       ),
       extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Basic Details Section
+                Text(
+                  "Basic Details",
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _ProfileField(
+                  label: 'Full Name',
+                  icon: Icons.person,
+                  controller: TextEditingController(text: profileState.userProfile.fullName),
+                  errorText: profileState.fieldErrors?['fullName'],
+                  hint: 'Enter your full name',
+                  onChanged: profileController.updateFullName,
+                  keyboardType: TextInputType.name,
+                ),
+                _ProfileField(
+                  label: 'Email',
+                  icon: Icons.email,
+                  controller: TextEditingController(text: profileState.userProfile.email),
+                  errorText: profileState.fieldErrors?['email'],
+                  hint: 'Enter your email',
+                  onChanged: profileController.updateEmail,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                _ProfileField(
+                  label: 'Phone Number',
+                  icon: Icons.phone,
+                  controller: TextEditingController(text: profileState.userProfile.phoneWithCountryCode),
+                  errorText: profileState.fieldErrors?['phone'],
+                  hint: '+91 9876543210',
+                  onChanged: profileController.updatePhone,
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 32),
+
+                // Personal Section
+                Text(
+                  "Personal",
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _DatePickerField(
+                  label: 'Date of Birth',
+                  icon: Icons.calendar_today,
+                  selectedDate: profileState.userProfile.dob,
+                  onChanged: profileController.updateDob,
+                  ageText: profileController.ageDisplay,
+                  errorText: profileState.fieldErrors?['dob'],
+                ),
+                _GenderDropdown(
+                  label: 'Gender',
+                  icon: Icons.wc,
+                  selectedGender: profileState.userProfile.gender,
+                  onChanged: profileController.updateGender,
+                  errorText: profileState.fieldErrors?['gender'],
+                ),
+                const SizedBox(height: 40),
+
+                // Save Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: profileController.isFormValid
+                        ? profileController.saveProfile
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: profileState.isSaving
+                        ? const CircularProgressIndicator()
+                        : const Text('Save Profile'),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+
+          // OTP Dialog
+          if (profileState.showOtpDialog)
+            _OtpDialog(
+              onVerify: (otp) => profileController.verifyOtp(otp),
+              onClose: profileController.closeOtpDialog,
+              isLoading: false,
+              error: profileState.errorMessage,
+            ),
+
+          // Email Verification Dialog
+          if (profileState.showEmailVerificationDialog)
+            _EmailVerificationDialog(
+              onVerify: profileController.verifyEmail,
+              onClose: profileController.closeEmailDialog,
+            ),
+
+          // Success Popup
+          if (profileState.profileSaved)
+            Positioned(
+              bottom: 20,
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check, color: Colors.white),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Profile Updated Successfully',
+                        style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: profileController.dismissSuccess,
+                      icon: const Icon(Icons.close, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileField extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final TextEditingController controller;
+  final String? errorText;
+  final String hint;
+  final Function(String) onChanged;
+  final TextInputType keyboardType;
+
+  const _ProfileField({
+    required this.label,
+    required this.icon,
+    required this.controller,
+    this.errorText,
+    required this.hint,
+    required this.onChanged,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  _ProfileFieldState createState() => _ProfileFieldState();
+}
+
+class _ProfileFieldState extends State<_ProfileField> {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextField(
+        controller: widget.controller,
+        decoration: InputDecoration(
+          labelText: widget.label,
+          hintText: widget.hint,
+          errorText: widget.errorText,
+          prefixIcon: Icon(widget.icon),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          filled: true,
+          fillColor: theme.colorScheme.surfaceContainerHighest,
+        ),
+        keyboardType: widget.keyboardType,
+        onChanged: widget.onChanged,
+      ),
+    );
+  }
+}
+
+class _DatePickerField extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final DateTime? selectedDate;
+  final Function(DateTime) onChanged;
+  final String ageText;
+  final String? errorText;
+
+  const _DatePickerField({
+    required this.label,
+    required this.icon,
+    this.selectedDate,
+    required this.onChanged,
+    required this.ageText,
+    this.errorText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              labelText: label,
+              errorText: errorText,
+              prefixIcon: Icon(icon),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHighest,
+              suffixIcon: const Icon(Icons.calendar_today),
+            ),
+            controller: TextEditingController(
+              text: selectedDate != null ? DateFormat('yyyy-MM-dd').format(selectedDate!) : '',
+            ),
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: selectedDate ?? DateTime.now().subtract(const Duration(days: 365*18)),
+                firstDate: DateTime(1900),
+                lastDate: DateTime.now(),
+              );
+              if (picked != null) {
+                onChanged(picked);
+              }
+            },
+          ),
+          if (ageText.isNotEmpty) Padding(
+            padding: const EdgeInsets.only(left: 16, top: 4),
+            child: Text(
+              ageText,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GenderDropdown extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Gender? selectedGender;
+  final Function(Gender) onChanged;
+  final String? errorText;
+
+  const _GenderDropdown({
+    required this.label,
+    required this.icon,
+    this.selectedGender,
+    required this.onChanged,
+    this.errorText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<Gender>(
+        decoration: InputDecoration(
+          labelText: label,
+          errorText: errorText,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          filled: true,
+          fillColor: theme.colorScheme.surfaceContainerHighest,
+        ),
+        value: selectedGender,
+        items: Gender.values.map((gender) {
+          return DropdownMenuItem(
+            value: gender,
+            child: Text(_genderDisplay(gender)),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value != null) onChanged(value);
+        },
+      ),
+    );
+  }
+
+  String _genderDisplay(Gender gender) {
+    switch (gender) {
+      case Gender.male:
+        return 'Male';
+      case Gender.female:
+        return 'Female';
+      case Gender.other:
+        return 'Other';
+      case Gender.preferNotToSay:
+        return 'Prefer not to say';
+    }
+  }
+}
+
+class _OtpDialog extends StatefulWidget {
+  final Function(String) onVerify;
+  final VoidCallback onClose;
+  final bool isLoading;
+  final String? error;
+
+  const _OtpDialog({
+    required this.onVerify,
+    required this.onClose,
+    required this.isLoading,
+    this.error,
+  });
+
+  @override
+  _OtpDialogState createState() => _OtpDialogState();
+}
+
+class _OtpDialogState extends State<_OtpDialog> {
+  final TextEditingController _otpController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Header Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(
-                top: 100, // accommodate transparent app bar
-                bottom: 32,
-                left: 24,
-                right: 24,
-              ),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.3,
-                ),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: colorScheme.primaryContainer,
-                        child: Text(
-                          "JD",
-                          style: textTheme.displayMedium?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.edit,
-                            size: 16,
-                            color: colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "John Doe",
-                    style: textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "john.doe@example.com",
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 16,
-                          color: colorScheme.onSecondaryContainer,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Free Plan",
-                          style: textTheme.labelLarge?.copyWith(
-                            color: colorScheme.onSecondaryContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            const Text(
+              'Enter OTP',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-
-            const SizedBox(height: 24),
-
-            // Statistics Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      label: "Days Active",
-                      value: "12",
-                      icon: Icons.calendar_month,
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _StatCard(
-                      label: "Mood Logs",
-                      value: "48",
-                      icon: Icons.mood,
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 8),
+            const Text('An OTP has been sent to your phone for verification.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _otpController,
+              decoration: const InputDecoration(
+                labelText: 'OTP',
+                hintText: 'Enter 6-digit OTP',
               ),
+              keyboardType: TextInputType.number,
+              maxLength: 6,
             ),
+            if (widget.error != null) Text(widget.error!, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: widget.onClose,
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: widget.isLoading ? null : () => widget.onVerify(_otpController.text),
+                  child: widget.isLoading ? const CircularProgressIndicator() : const Text('Verify'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 32),
+  @override
+  void dispose() {
+    _otpController.dispose();
+    super.dispose();
+  }
+}
 
-            // Settings Sections
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Preferences",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsTile(
-                    icon: themeMode == ThemeMode.dark
-                        ? Icons.dark_mode
-                        : Icons.light_mode,
-                    title: "Theme",
-                    subtitle: themeMode == ThemeMode.system
-                        ? "System Default"
-                        : (themeMode == ThemeMode.dark
-                              ? "Dark Mode"
-                              : "Light Mode"),
-                    trailing: Switch(
-                      value: themeMode == ThemeMode.dark,
-                      onChanged: (value) {
-                        ref.read(themeProvider.notifier).toggleTheme();
-                      },
-                    ),
-                  ),
-                  _SettingsTile(
-                    icon: Icons.notifications_outlined,
-                    title: "Notifications",
-                    subtitle: "Manage reminders",
-                    onTap: () {},
-                  ),
+class _EmailVerificationDialog extends StatelessWidget {
+  final VoidCallback onVerify;
+  final VoidCallback onClose;
 
-                  const SizedBox(height: 24),
-                  Text(
-                    "Data & Privacy",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsTile(
-                    icon: Icons.security,
-                    title: "Privacy Settings",
-                    onTap: () {},
-                  ),
-                  _SettingsTile(
-                    icon: Icons.download_outlined,
-                    title: "Export Data",
-                    onTap: () {},
-                  ),
-                  _SettingsTile(
-                    icon: Icons.delete_outline,
-                    title: "Clear Local Data",
-                    textColor: colorScheme.error,
-                    iconColor: colorScheme.error,
-                    onTap: () {},
-                  ),
+  const _EmailVerificationDialog({
+    required this.onVerify,
+    required this.onClose,
+  });
 
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Logout functionality coming soon'),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.logout),
-                      label: const Text("Log Out"),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: colorScheme.outline),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Center(
-                    child: Text(
-                      "Version 1.0.0",
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Verify Email',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text('A verification email has been sent to your email address.'),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: onClose,
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: onVerify,
+                  child: const Text('Mark as Verified'),
+                ),
+              ],
             ),
           ],
         ),
