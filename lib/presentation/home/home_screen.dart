@@ -61,20 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // Reduce height so the nav bar is less tall
           height: 70,
           selectedIndex: _selectedIndex,
-          onDestinationSelected: (int index) {
-            if (index == 2) {
-              // SOS - Push as separate screen, don't change selected index
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SOSScreen()),
-              );
-            } else if (index < 2) {
-              // Home or Health tabs
-              setState(() => _selectedIndex = index);
-            } else {
-              // Care or Profile tabs (skip index 2 for SOS)
-              setState(() => _selectedIndex = index - 1);
-            }
-          },
+          onDestinationSelected: _onDestinationSelected,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
@@ -85,11 +72,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: Icon(Icons.monitor_heart_outlined),
               selectedIcon: Icon(Icons.monitor_heart),
               label: 'Health',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.sos_outlined, color: Colors.red),
-              selectedIcon: Icon(Icons.sos, color: Colors.red),
-              label: 'SOS',
             ),
             NavigationDestination(
               icon: Icon(Icons.medical_services_outlined),
@@ -103,8 +85,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SOSScreen()),
+            );
+          },
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.sos),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
     );
+  }
+
+  void _onDestinationSelected(int index) {
+    setState(() => _selectedIndex = index);
   }
 
   Widget _getSelectedScreen(int index, Widget homeContent) {

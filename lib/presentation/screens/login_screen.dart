@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifepro_new/presentation/providers/providers.dart';
+import 'package:lifepro_new/presentation/home/home_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -250,7 +251,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       ),
                     ),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 16),
+
+                    // Skip Button for demo/testing
+                    Center(
+                      child: TextButton(
+                        onPressed: _handleSkip,
+                        style: TextButton.styleFrom(
+                          foregroundColor: colorScheme.onSurfaceVariant,
+                        ),
+                        child: Text(
+                          'Skip Login (Demo)',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
 
                     // Features Preview
                     Container(
@@ -401,6 +421,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (mounted) {
         setState(() => isLoading = false);
       }
+    }
+  }
+
+  void _handleSkip() {
+    // Skip authentication and proceed directly to home screen
+    final authService = ref.read(authServiceProvider);
+    authService.login('demo@example.com', 'demo123', 'Demo User');
+    if (mounted) {
+      // Force navigation to home screen after successful demo login
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
     }
   }
 }

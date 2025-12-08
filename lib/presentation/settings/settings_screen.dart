@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/theme_provider.dart';
+import '../providers/providers.dart';
+import 'package:lifepro_new/presentation/screens/login_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -139,6 +141,52 @@ class SettingsScreen extends ConsumerWidget {
                       const Text("Designed for your wellbeing."),
                     ],
                   );
+                },
+              ),
+            ],
+          ),
+
+          // Account Section
+          _SettingsSection(
+            title: "Account",
+            children: [
+              _SettingsTile(
+                icon: Icons.logout_outlined,
+                title: "Logout",
+                subtitle: "Sign out of your account",
+                onTap: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Logout'),
+                      content: const Text('Are you sure you want to logout?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                          ),
+                          child: const Text('Logout'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true) {
+                    final authService = ref.read(authServiceProvider);
+                    await authService.logout();
+                    // Check if context is still valid before navigating
+                    if (context.mounted) {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        (route) => false,
+                      );
+                    }
+                  }
                 },
               ),
             ],

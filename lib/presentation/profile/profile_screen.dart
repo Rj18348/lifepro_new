@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifepro_new/presentation/profile/profile_controller.dart';
 import 'package:lifepro_new/presentation/providers/providers.dart';
+import 'package:lifepro_new/presentation/settings/settings_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -84,6 +85,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         actions: [
+          if (!isEditing)
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+              icon: const Icon(Icons.settings),
+              tooltip: 'Settings',
+            ),
           if (!isEditing)
             TextButton.icon(
               onPressed: toggleEditMode,
