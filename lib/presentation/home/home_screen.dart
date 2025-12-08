@@ -64,8 +64,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // Reduce height so the nav bar is less tall
           height: 70,
           selectedIndex: _selectedIndex,
-          onDestinationSelected: (int index) =>
-              setState(() => _selectedIndex = index),
+          onDestinationSelected: (int index) {
+            if (index == 2) {
+              _showSOSDialog(context);
+            } else {
+              setState(() => _selectedIndex = index < 2 ? index : index - 1);
+            }
+          },
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
@@ -76,6 +81,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               icon: Icon(Icons.monitor_heart_outlined),
               selectedIcon: Icon(Icons.monitor_heart),
               label: 'Health',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.sos_outlined, color: Colors.red),
+              selectedIcon: Icon(Icons.sos, color: Colors.red),
+              label: 'SOS',
             ),
             NavigationDestination(
               icon: Icon(Icons.medical_services_outlined),
