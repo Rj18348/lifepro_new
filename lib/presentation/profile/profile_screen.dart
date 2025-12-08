@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -18,38 +16,23 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  late final TextEditingController _fullNameController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _phoneController;
+  late TextEditingController _fullNameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
 
   @override
   void initState() {
     super.initState();
     final profileState = ref.read(profileControllerProvider);
-
-    _fullNameController = TextEditingController(text: profileState.userProfile.fullName);
-    _emailController = TextEditingController(text: profileState.userProfile.email);
-    _phoneController = TextEditingController(text: profileState.userProfile.phoneWithCountryCode);
-
-    // Listen to controller changes to update state
-    _fullNameController.addListener(() => _updateFullName());
-    _emailController.addListener(() => _updateEmail());
-    _phoneController.addListener(() => _updatePhone());
-  }
-
-  void _updateFullName() {
-    final profileController = ref.read(profileControllerProvider.notifier);
-    profileController.updateFullName(_fullNameController.text);
-  }
-
-  void _updateEmail() {
-    final profileController = ref.read(profileControllerProvider.notifier);
-    profileController.updateEmail(_emailController.text);
-  }
-
-  void _updatePhone() {
-    final profileController = ref.read(profileControllerProvider.notifier);
-    profileController.updatePhone(_phoneController.text);
+    _fullNameController = TextEditingController(
+      text: profileState.userProfile.fullName,
+    );
+    _emailController = TextEditingController(
+      text: profileState.userProfile.email,
+    );
+    _phoneController = TextEditingController(
+      text: profileState.userProfile.phoneWithCountryCode,
+    );
   }
 
   @override
@@ -70,192 +53,174 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final textTheme = theme.textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Profile Picture Section
-                _ProfilePictureSection(
-                  profilePictureUrl: profileState.userProfile.profilePictureUrl,
-                  onPickImage: () => _showImageSourceDialog(context, profileController),
-                ),
-                const SizedBox(height: 32),
-
-                // Basic Details Section
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Basic Details",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Profile Picture Section
+                  _ProfilePictureSection(
+                    profilePictureUrl:
+                        profileState.userProfile.profilePictureUrl,
+                    onPickImage: () =>
+                        _showImageSourceDialog(context, profileController),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _ProfileField(
-                  controller: _fullNameController,
-                  label: 'Full Name',
-                  icon: Icons.person,
-                  errorText: profileState.fieldErrors?['fullName'],
-                  hint: 'Enter your full name',
-                  keyboardType: TextInputType.name,
-                ),
-                _ProfileField(
-                  controller: _emailController,
-                  label: 'Email',
-                  icon: Icons.email,
-                  errorText: profileState.fieldErrors?['email'],
-                  hint: 'Enter your email',
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                _ProfileField(
-                  controller: _phoneController,
-                  label: 'Phone Number',
-                  icon: Icons.phone,
-                  errorText: profileState.fieldErrors?['phone'],
-                  hint: '+91 9876543210',
-                  keyboardType: TextInputType.phone,
-                ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
-                // Personal Section
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Personal",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _DatePickerField(
-                  label: 'Date of Birth',
-                  icon: Icons.calendar_today,
-                  selectedDate: profileState.userProfile.dob,
-                  onChanged: profileController.updateDob,
-                  ageText: profileController.ageDisplay,
-                  errorText: profileState.fieldErrors?['dob'],
-                ),
-                _GenderDropdown(
-                  label: 'Gender',
-                  icon: Icons.wc,
-                  selectedGender: profileState.userProfile.gender,
-                  onChanged: profileController.updateGender,
-                  errorText: profileState.fieldErrors?['gender'],
-                ),
-                const SizedBox(height: 32),
-
-                // Emergency Contacts Section
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Emergency Contacts",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _EmergencyContactsSection(profileController: profileController),
-                const SizedBox(height: 16),
-                // Auto-share location toggle
-                SwitchListTile(
-                  title: const Text('Auto-share location in SOS alerts'),
-                  subtitle: const Text('Include GPS location when sending emergency alerts'),
-                  value: profileState.userProfile.autoShareLocation,
-                  onChanged: profileController.updateAutoShareLocation,
-                ),
-                const SizedBox(height: 40),
-
-                // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: profileController.isFormValid
-                        ? profileController.saveProfile
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  // Basic Details Section
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Basic Details",
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
                       ),
                     ),
-                    child: profileState.isSaving
-                        ? const CircularProgressIndicator()
-                        : const Text('Save Profile'),
                   ),
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 16),
+                  _ProfileField(
+                    label: 'Full Name',
+                    icon: Icons.person,
+                    controller: _fullNameController,
+                    errorText: profileState.fieldErrors?['fullName'],
+                    hint: 'Enter your full name',
+                    onChanged: profileController.updateFullName,
+                    keyboardType: TextInputType.name,
+                  ),
+                  _ProfileField(
+                    label: 'Email',
+                    icon: Icons.email,
+                    controller: _emailController,
+                    errorText: profileState.fieldErrors?['email'],
+                    hint: 'Enter your email',
+                    onChanged: profileController.updateEmail,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  _ProfileField(
+                    label: 'Phone Number',
+                    icon: Icons.phone,
+                    controller: _phoneController,
+                    errorText: profileState.fieldErrors?['phone'],
+                    hint: '+91 9876543210',
+                    onChanged: profileController.updatePhone,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 32),
 
-          // OTP Dialog
-          if (profileState.showOtpDialog)
-            _OtpDialog(
-              onVerify: (otp) => profileController.verifyOtp(otp),
-              onClose: profileController.closeOtpDialog,
-              isLoading: false,
-              error: profileState.errorMessage,
-            ),
-
-          // Email Verification Dialog
-          if (profileState.showEmailVerificationDialog)
-            _EmailVerificationDialog(
-              onVerify: profileController.verifyEmail,
-              onClose: profileController.closeEmailDialog,
-            ),
-
-          // Success Popup
-          if (profileState.profileSaved)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Profile Updated Successfully',
-                        style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+                  // Personal Section
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Personal",
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
                       ),
                     ),
-                    IconButton(
-                      onPressed: profileController.dismissSuccess,
-                      icon: const Icon(Icons.close, color: Colors.white),
+                  ),
+                  const SizedBox(height: 16),
+                  _DatePickerField(
+                    label: 'Date of Birth',
+                    icon: Icons.calendar_today,
+                    selectedDate: profileState.userProfile.dob,
+                    onChanged: profileController.updateDob,
+                    ageText: profileController.ageDisplay,
+                    errorText: profileState.fieldErrors?['dob'],
+                  ),
+                  _GenderDropdown(
+                    label: 'Gender',
+                    icon: Icons.wc,
+                    selectedGender: profileState.userProfile.gender,
+                    onChanged: profileController.updateGender,
+                    errorText: profileState.fieldErrors?['gender'],
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: profileController.isFormValid
+                          ? profileController.saveProfile
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: profileState.isSaving
+                          ? const CircularProgressIndicator()
+                          : const Text('Save Profile'),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
-        ],
+
+            // OTP Dialog
+            if (profileState.showOtpDialog)
+              _OtpDialog(
+                onVerify: (otp) => profileController.verifyOtp(otp),
+                onClose: profileController.closeOtpDialog,
+                isLoading: false,
+                error: profileState.errorMessage,
+              ),
+
+            // Email Verification Dialog
+            if (profileState.showEmailVerificationDialog)
+              _EmailVerificationDialog(
+                onVerify: profileController.verifyEmail,
+                onClose: profileController.closeEmailDialog,
+              ),
+
+            // Success Popup
+            if (profileState.profileSaved)
+              Positioned(
+                bottom: 20,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Profile Updated Successfully',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: profileController.dismissSuccess,
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  void _showImageSourceDialog(BuildContext context, ProfileController controller) {
+  void _showImageSourceDialog(
+    BuildContext context,
+    ProfileController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -306,8 +271,9 @@ class _ProfilePictureSection extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           backgroundImage: profilePictureUrl != null
               ? (profilePictureUrl!.startsWith('http')
-                  ? CachedNetworkImageProvider(profilePictureUrl!)
-                  : FileImage(File(profilePictureUrl!))) as ImageProvider?
+                        ? CachedNetworkImageProvider(profilePictureUrl!)
+                        : FileImage(File(profilePictureUrl!)))
+                    as ImageProvider?
               : null,
           child: profilePictureUrl == null
               ? const Icon(Icons.person, size: 60, color: Colors.grey)
@@ -329,23 +295,30 @@ class _ProfilePictureSection extends StatelessWidget {
   }
 }
 
-class _ProfileField extends StatelessWidget {
+class _ProfileField extends StatefulWidget {
   final String label;
   final IconData icon;
   final TextEditingController controller;
   final String? errorText;
   final String hint;
+  final Function(String) onChanged;
   final TextInputType keyboardType;
 
   const _ProfileField({
-    required this.controller,
     required this.label,
     required this.icon,
+    required this.controller,
     this.errorText,
     required this.hint,
+    required this.onChanged,
     this.keyboardType = TextInputType.text,
   });
 
+  @override
+  _ProfileFieldState createState() => _ProfileFieldState();
+}
+
+class _ProfileFieldState extends State<_ProfileField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -353,19 +326,18 @@ class _ProfileField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
-        controller: controller,
+        controller: widget.controller,
         decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          errorText: errorText,
-          prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          labelText: widget.label,
+          hintText: widget.hint,
+          errorText: widget.errorText,
+          prefixIcon: Icon(widget.icon),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: theme.colorScheme.surfaceContainerHighest,
         ),
-        keyboardType: keyboardType,
+        keyboardType: widget.keyboardType,
+        onChanged: widget.onChanged,
       ),
     );
   }
@@ -410,12 +382,16 @@ class _DatePickerField extends StatelessWidget {
               suffixIcon: const Icon(Icons.calendar_today),
             ),
             controller: TextEditingController(
-              text: selectedDate != null ? DateFormat('yyyy-MM-dd').format(selectedDate!) : '',
+              text: selectedDate != null
+                  ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+                  : '',
             ),
             onTap: () async {
               final picked = await showDatePicker(
                 context: context,
-                initialDate: selectedDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
+                initialDate:
+                    selectedDate ??
+                    DateTime.now().subtract(const Duration(days: 365 * 18)),
                 firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
               );
@@ -424,15 +400,16 @@ class _DatePickerField extends StatelessWidget {
               }
             },
           ),
-          if (ageText.isNotEmpty) Padding(
-            padding: const EdgeInsets.only(left: 16, top: 4),
-            child: Text(
-              ageText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.primary,
+          if (ageText.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 4),
+              child: Text(
+                ageText,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -464,9 +441,7 @@ class _GenderDropdown extends StatelessWidget {
           labelText: label,
           errorText: errorText,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: theme.colorScheme.surfaceContainerHighest,
         ),
@@ -497,8 +472,6 @@ class _GenderDropdown extends StatelessWidget {
     }
   }
 }
-
-
 
 class _OtpDialog extends StatefulWidget {
   final Function(String) onVerify;
@@ -545,7 +518,8 @@ class _OtpDialogState extends State<_OtpDialog> {
               keyboardType: TextInputType.number,
               maxLength: 6,
             ),
-            if (widget.error != null) Text(widget.error!, style: const TextStyle(color: Colors.red)),
+            if (widget.error != null)
+              Text(widget.error!, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -556,8 +530,12 @@ class _OtpDialogState extends State<_OtpDialog> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: widget.isLoading ? null : () => widget.onVerify(_otpController.text),
-                  child: widget.isLoading ? const CircularProgressIndicator() : const Text('Verify'),
+                  onPressed: widget.isLoading
+                      ? null
+                      : () => widget.onVerify(_otpController.text),
+                  child: widget.isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Verify'),
                 ),
               ],
             ),
@@ -597,15 +575,14 @@ class _EmailVerificationDialog extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text('A verification email has been sent to your email address.'),
+            const Text(
+              'A verification email has been sent to your email address.',
+            ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: onClose,
-                  child: const Text('Cancel'),
-                ),
+                TextButton(onPressed: onClose, child: const Text('Cancel')),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: onVerify,
@@ -616,103 +593,6 @@ class _EmailVerificationDialog extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _EmergencyContactsSection extends ConsumerWidget {
-  final ProfileController profileController;
-
-  const _EmergencyContactsSection({required this.profileController});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profileState = ref.watch(profileControllerProvider);
-
-    return Column(
-      children: [
-        // List of contacts
-        if (profileState.userProfile.emergencyContacts.isNotEmpty)
-          ...profileState.userProfile.emergencyContacts.asMap().entries.map((entry) {
-            final index = entry.key;
-            final contact = entry.value;
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: const CircleAvatar(child: Icon(Icons.contact_phone)),
-                title: Text('${contact.name} (${contact.relation})'),
-                subtitle: Text(contact.phone),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => profileController.removeEmergencyContact(index),
-                ),
-              ),
-            );
-          })
-        else
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('No emergency contacts added yet.'),
-          ),
-
-        // Add new contact button
-        OutlinedButton.icon(
-          onPressed: () => _showAddContactDialog(context, profileController),
-          icon: const Icon(Icons.add),
-          label: const Text('Add Emergency Contact'),
-        ),
-      ],
-    );
-  }
-
-  void _showAddContactDialog(BuildContext context, ProfileController controller) {
-    final nameController = TextEditingController();
-    final phoneController = TextEditingController();
-    final relationController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Emergency Contact'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Name'),
-              ),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Phone Number'),
-                keyboardType: TextInputType.phone,
-              ),
-              TextField(
-                controller: relationController,
-                decoration: const InputDecoration(labelText: 'Relation (e.g., Family, Friend)'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                final phone = phoneController.text.trim();
-                final relation = relationController.text.trim();
-                if (name.isNotEmpty && phone.isNotEmpty && relation.isNotEmpty) {
-                  controller.addEmergencyContact(name, phone, relation);
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
