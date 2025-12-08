@@ -638,7 +638,7 @@ class _TimezoneDropdown extends StatelessWidget {
           filled: true,
           fillColor: theme.colorScheme.surfaceContainerHighest,
         ),
-        value: selectedTimezone,
+        initialValue: selectedTimezone,
         items: timezones.map((timezone) {
           return DropdownMenuItem(
             value: timezone,
