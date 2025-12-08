@@ -37,6 +37,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       curve: Curves.easeInOut,
     ));
 
+    // Pre-fill with demo credentials for easy testing
+    _emailController.text = 'abcd@gmail.com';
+    _passwordController.text = '123456789';
+    _fullNameController.text = 'Demo User';
+
     _animationController.forward();
   }
 

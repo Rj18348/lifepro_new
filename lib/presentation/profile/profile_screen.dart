@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifepro_new/presentation/profile/profile_controller.dart';
+import 'package:lifepro_new/presentation/providers/providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -11,8 +12,10 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late TextEditingController _fullNameController;
-  late TextEditingController _emailController;
+  late TextEditingController _authEmailController;
   late TextEditingController _phoneController;
+
+  String? _authEmail;
 
   bool _isEditing = false;
 
@@ -21,14 +24,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     final profileState = ref.read(profileControllerProvider);
     _fullNameController = TextEditingController(text: profileState.userProfile.fullName);
-    _emailController = TextEditingController(text: profileState.userProfile.email);
     _phoneController = TextEditingController(text: profileState.userProfile.phoneNumber);
+    _loadAuthData();
+  }
+
+  Future<void> _loadAuthData() async {
+    final authService = ref.read(authServiceProvider);
+    _authEmail = await authService.getCurrentUserEmail();
+    if (_authEmail != null) {
+      _authEmailController = TextEditingController(text: _authEmail);
+      setState(() {}); // Update UI when auth data is loaded
+    }
   }
 
   @override
   void dispose() {
     _fullNameController.dispose();
-    _emailController.dispose();
+    _authEmailController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -41,7 +53,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // Reset form values from controller
     final profileState = ref.read(profileControllerProvider);
     _fullNameController.text = profileState.userProfile.fullName;
-    _emailController.text = profileState.userProfile.email;
+    _authEmailController.text = _authEmail ?? '';
     _phoneController.text = profileState.userProfile.phoneNumber;
 
     setState(() => _isEditing = false);
@@ -166,13 +178,54 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _ProfileField(
                     label: 'Email',
                     icon: Icons.email,
-                    controller: _emailController,
-                    errorText: profileState.fieldErrors?['email'],
-                    hint: 'Enter your email',
-                    onChanged: profileController.updateEmail,
+                    controller: _authEmailController,
+                    errorText: null,
+                    hint: _authEmail ?? 'No email available',
+                    onChanged: (value) {},
                     keyboardType: TextInputType.emailAddress,
-                    readOnly: !_isEditing,
+                    readOnly: true,
                   ),
+
+                  // Password display (for security, we don't show it)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLowest,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.lock,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Password',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                '••••••••', // Security: don't show actual password
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontFamily: 'monospace',
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
                   _ProfileField(
                     label: 'Phone Number',
                     icon: Icons.phone,
