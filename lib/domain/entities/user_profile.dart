@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:lifepro_new/domain/entities/emergency_contact.dart';
 
 part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
@@ -32,6 +33,9 @@ class UserProfile with _$UserProfile {
     String? country,
     String? city,
     String? timezone,
+    // SOS Feature
+    @Default([]) List<EmergencyContact> emergencyContacts,
+    @Default(false) bool autoShareLocation,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>

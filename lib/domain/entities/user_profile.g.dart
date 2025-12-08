@@ -22,6 +22,12 @@ _$UserProfileImpl _$$UserProfileImplFromJson(Map<String, dynamic> json) =>
       country: json['country'] as String?,
       city: json['city'] as String?,
       timezone: json['timezone'] as String?,
+      emergencyContacts:
+          (json['emergencyContacts'] as List<dynamic>?)
+              ?.map((e) => EmergencyContact.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      autoShareLocation: json['autoShareLocation'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
@@ -40,6 +46,8 @@ Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
       'country': instance.country,
       'city': instance.city,
       'timezone': instance.timezone,
+      'emergencyContacts': instance.emergencyContacts,
+      'autoShareLocation': instance.autoShareLocation,
     };
 
 const _$GenderEnumMap = {

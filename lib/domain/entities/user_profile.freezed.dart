@@ -35,7 +35,10 @@ mixin _$UserProfile {
   String? get occupation => throw _privateConstructorUsedError;
   String? get country => throw _privateConstructorUsedError;
   String? get city => throw _privateConstructorUsedError;
-  String? get timezone => throw _privateConstructorUsedError;
+  String? get timezone => throw _privateConstructorUsedError; // SOS Feature
+  List<EmergencyContact> get emergencyContacts =>
+      throw _privateConstructorUsedError;
+  bool get autoShareLocation => throw _privateConstructorUsedError;
 
   /// Serializes this UserProfile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -69,6 +72,8 @@ abstract class $UserProfileCopyWith<$Res> {
     String? country,
     String? city,
     String? timezone,
+    List<EmergencyContact> emergencyContacts,
+    bool autoShareLocation,
   });
 }
 
@@ -101,6 +106,8 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
     Object? country = freezed,
     Object? city = freezed,
     Object? timezone = freezed,
+    Object? emergencyContacts = null,
+    Object? autoShareLocation = null,
   }) {
     return _then(
       _value.copyWith(
@@ -160,6 +167,14 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
                 ? _value.timezone
                 : timezone // ignore: cast_nullable_to_non_nullable
                       as String?,
+            emergencyContacts: null == emergencyContacts
+                ? _value.emergencyContacts
+                : emergencyContacts // ignore: cast_nullable_to_non_nullable
+                      as List<EmergencyContact>,
+            autoShareLocation: null == autoShareLocation
+                ? _value.autoShareLocation
+                : autoShareLocation // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -190,6 +205,8 @@ abstract class _$$UserProfileImplCopyWith<$Res>
     String? country,
     String? city,
     String? timezone,
+    List<EmergencyContact> emergencyContacts,
+    bool autoShareLocation,
   });
 }
 
@@ -221,6 +238,8 @@ class __$$UserProfileImplCopyWithImpl<$Res>
     Object? country = freezed,
     Object? city = freezed,
     Object? timezone = freezed,
+    Object? emergencyContacts = null,
+    Object? autoShareLocation = null,
   }) {
     return _then(
       _$UserProfileImpl(
@@ -280,6 +299,14 @@ class __$$UserProfileImplCopyWithImpl<$Res>
             ? _value.timezone
             : timezone // ignore: cast_nullable_to_non_nullable
                   as String?,
+        emergencyContacts: null == emergencyContacts
+            ? _value._emergencyContacts
+            : emergencyContacts // ignore: cast_nullable_to_non_nullable
+                  as List<EmergencyContact>,
+        autoShareLocation: null == autoShareLocation
+            ? _value.autoShareLocation
+            : autoShareLocation // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -303,7 +330,9 @@ class _$UserProfileImpl implements _UserProfile {
     this.country,
     this.city,
     this.timezone,
-  });
+    final List<EmergencyContact> emergencyContacts = const [],
+    this.autoShareLocation = false,
+  }) : _emergencyContacts = emergencyContacts;
 
   factory _$UserProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserProfileImplFromJson(json);
@@ -344,10 +373,25 @@ class _$UserProfileImpl implements _UserProfile {
   final String? city;
   @override
   final String? timezone;
+  // SOS Feature
+  final List<EmergencyContact> _emergencyContacts;
+  // SOS Feature
+  @override
+  @JsonKey()
+  List<EmergencyContact> get emergencyContacts {
+    if (_emergencyContacts is EqualUnmodifiableListView)
+      return _emergencyContacts;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_emergencyContacts);
+  }
+
+  @override
+  @JsonKey()
+  final bool autoShareLocation;
 
   @override
   String toString() {
-    return 'UserProfile(fullName: $fullName, email: $email, phoneWithCountryCode: $phoneWithCountryCode, dob: $dob, gender: $gender, emailVerified: $emailVerified, phoneVerified: $phoneVerified, profilePictureUrl: $profilePictureUrl, nickname: $nickname, bio: $bio, occupation: $occupation, country: $country, city: $city, timezone: $timezone)';
+    return 'UserProfile(fullName: $fullName, email: $email, phoneWithCountryCode: $phoneWithCountryCode, dob: $dob, gender: $gender, emailVerified: $emailVerified, phoneVerified: $phoneVerified, profilePictureUrl: $profilePictureUrl, nickname: $nickname, bio: $bio, occupation: $occupation, country: $country, city: $city, timezone: $timezone, emergencyContacts: $emergencyContacts, autoShareLocation: $autoShareLocation)';
   }
 
   @override
@@ -376,7 +420,13 @@ class _$UserProfileImpl implements _UserProfile {
             (identical(other.country, country) || other.country == country) &&
             (identical(other.city, city) || other.city == city) &&
             (identical(other.timezone, timezone) ||
-                other.timezone == timezone));
+                other.timezone == timezone) &&
+            const DeepCollectionEquality().equals(
+              other._emergencyContacts,
+              _emergencyContacts,
+            ) &&
+            (identical(other.autoShareLocation, autoShareLocation) ||
+                other.autoShareLocation == autoShareLocation));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -397,6 +447,8 @@ class _$UserProfileImpl implements _UserProfile {
     country,
     city,
     timezone,
+    const DeepCollectionEquality().hash(_emergencyContacts),
+    autoShareLocation,
   );
 
   /// Create a copy of UserProfile
@@ -429,6 +481,8 @@ abstract class _UserProfile implements UserProfile {
     final String? country,
     final String? city,
     final String? timezone,
+    final List<EmergencyContact> emergencyContacts,
+    final bool autoShareLocation,
   }) = _$UserProfileImpl;
 
   factory _UserProfile.fromJson(Map<String, dynamic> json) =
@@ -461,7 +515,11 @@ abstract class _UserProfile implements UserProfile {
   @override
   String? get city;
   @override
-  String? get timezone;
+  String? get timezone; // SOS Feature
+  @override
+  List<EmergencyContact> get emergencyContacts;
+  @override
+  bool get autoShareLocation;
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.

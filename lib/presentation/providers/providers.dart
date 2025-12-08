@@ -1,12 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lifepro_new/core/services/local_storage_service.dart';
 import 'package:lifepro_new/core/services/hive_storage_service.dart';
+import 'package:lifepro_new/core/services/sos_service.dart';
 import 'package:lifepro_new/domain/repositories/wellbeing_repository.dart';
 import 'package:lifepro_new/data/repositories/wellbeing_repository_impl.dart';
 
 // Service Providers
 final localStorageServiceProvider = Provider<LocalStorageService>((ref) {
   return HiveLocalStorageService();
+});
+
+final sosServiceProvider = Provider<SOSService>((ref) {
+  return SOSService();
 });
 
 // Repository Providers

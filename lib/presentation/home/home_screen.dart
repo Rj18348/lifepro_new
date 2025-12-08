@@ -5,6 +5,8 @@ import 'package:lifepro_new/presentation/screens/health_monitoring_screen.dart';
 import 'package:lifepro_new/presentation/screens/care_screen.dart';
 import 'package:lifepro_new/presentation/screens/notifications_screen.dart';
 import 'package:lifepro_new/presentation/profile/profile_screen.dart';
+import 'package:lifepro_new/presentation/profile/profile_controller.dart';
+import 'package:lifepro_new/presentation/providers/providers.dart';
 import 'home_state.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -633,53 +635,114 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 
   Widget _buildEmergencyButton(BuildContext context) {
-    return Center(
-      child: TextButton.icon(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => Container(
-              padding: const EdgeInsets.all(24),
-              width: double.infinity,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Need Help?",
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "You are not alone. Reach out to someone you trust.",
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Close"),
-                  ),
-                ],
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: () => _showSOSDialog(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-          );
-        },
-        icon: Icon(
-          Icons.support_agent,
-          color: Theme.of(context).colorScheme.error,
-        ),
-        label: Text(
-          "Need Help?",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.error,
-            fontWeight: FontWeight.bold,
+            shadowColor: Colors.red.withValues(alpha: 0.3),
+            elevation: 8,
           ),
-        ),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+          child: const Text(
+            'SOS EMERGENCY',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showSOSDialog(BuildContext context) {
+    final scaffoldContext = context; // Capture scaffold context to avoid async gap
+    showDialog(
+      context: scaffoldContext,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final profile = ref.watch(profileControllerProvider).userProfile;
+        final sosService = ref.read(sosServiceProvider);
+
+        return AlertDialog(
+          title: const Text(
+            'SOS Emergency Alert',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'This will send an emergency alert to all your contacts and emergency services.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              if (profile.emergencyContacts.isNotEmpty) ...[
+                const Text(
+                  'Contacts to notify:',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                ...profile.emergencyContacts.map((contact) => Text('${contact.name} (${contact.relation})')),
+              ] else
+                const Text(
+                  'No emergency contacts configured. Please add contacts in your profile.',
+                  style: TextStyle(color: Colors.red),
+                ),
+              const SizedBox(height: 16),
+              if (profile.autoShareLocation)
+                const Text('Your current location will be included in the alert.'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await sosService.sendSOSAlert(profile);
+                  if (mounted) {
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                      const SnackBar(
+                        content: Text('SOS Alert sent successfully'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to send SOS alert: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('SEND SOS ALERT'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:lifepro_new/domain/entities/emergency_contact.dart';
 import 'package:lifepro_new/domain/entities/user_profile.dart';
 import 'package:lifepro_new/presentation/profile/profile_state.dart';
 import 'package:path_provider/path_provider.dart';
@@ -170,6 +171,27 @@ class ProfileController extends StateNotifier<ProfileState> {
 
   void updateTimezone(String? timezone) {
     final newProfile = state.userProfile.copyWith(timezone: timezone);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  void addEmergencyContact(String name, String phone, String relation) {
+    final newContact = EmergencyContact(name: name, phone: phone, relation: relation);
+    final newContacts = [...state.userProfile.emergencyContacts, newContact];
+    final newProfile = state.userProfile.copyWith(emergencyContacts: newContacts);
+    state = state.copyWith(userProfile: newProfile);
+  }
+
+  void removeEmergencyContact(int index) {
+    final newContacts = List<EmergencyContact>.from(state.userProfile.emergencyContacts);
+    if (index >= 0 && index < newContacts.length) {
+      newContacts.removeAt(index);
+      final newProfile = state.userProfile.copyWith(emergencyContacts: newContacts);
+      state = state.copyWith(userProfile: newProfile);
+    }
+  }
+
+  void updateAutoShareLocation(bool value) {
+    final newProfile = state.userProfile.copyWith(autoShareLocation: value);
     state = state.copyWith(userProfile: newProfile);
   }
 
