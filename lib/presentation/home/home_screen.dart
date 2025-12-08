@@ -4,9 +4,8 @@ import 'home_controller.dart';
 import 'package:lifepro_new/presentation/screens/health_monitoring_screen.dart';
 import 'package:lifepro_new/presentation/screens/care_screen.dart';
 import 'package:lifepro_new/presentation/screens/notifications_screen.dart';
+import 'package:lifepro_new/presentation/screens/sos_screen.dart';
 import 'package:lifepro_new/presentation/profile/profile_screen.dart';
-import 'package:lifepro_new/presentation/profile/profile_controller.dart';
-import 'package:lifepro_new/presentation/providers/providers.dart';
 import 'home_state.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -47,8 +46,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _buildNextTaskSection(context, state),
                     const SizedBox(height: 24),
                     _buildStatsCards(context, state),
-                    const SizedBox(height: 24),
-                    _buildEmergencyButton(context),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -66,7 +63,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           selectedIndex: _selectedIndex,
           onDestinationSelected: (int index) {
             if (index == 2) {
-              _showSOSDialog(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SOSScreen()),
+              );
             } else {
               setState(() => _selectedIndex = index < 2 ? index : index - 1);
             }
@@ -648,106 +647,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
 
 
-  Widget _buildEmergencyButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () => _showSOSDialog(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            shadowColor: Colors.red.withValues(alpha: 0.3),
-            elevation: 8,
-          ),
-          child: const Text(
-            'SOS EMERGENCY',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  void _showSOSDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        final dialogContextCopy = dialogContext; // Capture to avoid async gap
-        final profile = ref.watch(profileControllerProvider).userProfile;
-        final sosService = ref.read(sosServiceProvider);
-
-        return AlertDialog(
-          title: const Text(
-            'SOS Emergency Alert',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'This will send an emergency alert to emergency services.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Emergency contacts have been removed from the profile.',
-                style: TextStyle(color: Colors.orange),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  await sosService.sendSOSAlert(profile);
-                  if (mounted) {
-                    Navigator.pop(dialogContextCopy); // ignore: use_build_context_synchronously
-                    scaffoldMessengerKey.currentState?.showSnackBar(
-                      const SnackBar(
-                        content: Text('SOS Alert sent successfully'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    Navigator.pop(dialogContextCopy); // ignore: use_build_context_synchronously
-                    scaffoldMessengerKey.currentState?.showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to send SOS alert: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('SEND SOS ALERT'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 class _MoodOptionCard extends StatelessWidget {
