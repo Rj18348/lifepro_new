@@ -63,11 +63,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           selectedIndex: _selectedIndex,
           onDestinationSelected: (int index) {
             if (index == 2) {
+              // SOS - Push as separate screen, don't change selected index
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SOSScreen()),
               );
+            } else if (index < 2) {
+              // Home or Health tabs
+              setState(() => _selectedIndex = index);
             } else {
-              setState(() => _selectedIndex = index < 2 ? index : index - 1);
+              // Care or Profile tabs (skip index 2 for SOS)
+              setState(() => _selectedIndex = index - 1);
             }
           },
           destinations: const [

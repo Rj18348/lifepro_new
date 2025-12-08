@@ -25,13 +25,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileState = ref.read(profileControllerProvider);
     fullNameController = TextEditingController(text: profileState.userProfile.fullName);
     phoneController = TextEditingController(text: profileState.userProfile.phoneNumber);
+    authEmailController = TextEditingController(text: 'Loading email...');
     loadAuthData();
   }
 
   Future<void> loadAuthData() async {
     final authService = ref.read(authServiceProvider);
     authEmail = await authService.getCurrentUserEmail();
-    authEmailController = TextEditingController(text: authEmail ?? 'No email available');
+    if (authEmail != null) {
+      authEmailController.text = authEmail!;
+    } else {
+      authEmailController.text = 'No email available';
+    }
     setState(() {}); // Update UI when auth data is loaded
   }
 
