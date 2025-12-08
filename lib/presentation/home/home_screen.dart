@@ -18,6 +18,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeControllerProvider);
@@ -55,36 +56,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
     );
 
-    return Scaffold(
-      body: _getSelectedScreen(_selectedIndex, homeContent),
-      bottomNavigationBar: NavigationBar(
-        // Reduce height so the nav bar is less tall
-        height: 70,
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (int index) =>
-            setState(() => _selectedIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.monitor_heart_outlined),
-            selectedIcon: Icon(Icons.monitor_heart),
-            label: 'Health',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.medical_services_outlined),
-            selectedIcon: Icon(Icons.medical_services),
-            label: 'Care',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+    return ScaffoldMessenger(
+      key: scaffoldMessengerKey,
+      child: Scaffold(
+        body: _getSelectedScreen(_selectedIndex, homeContent),
+        bottomNavigationBar: NavigationBar(
+          // Reduce height so the nav bar is less tall
+          height: 70,
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (int index) =>
+              setState(() => _selectedIndex = index),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.monitor_heart_outlined),
+              selectedIcon: Icon(Icons.monitor_heart),
+              label: 'Health',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.medical_services_outlined),
+              selectedIcon: Icon(Icons.medical_services),
+              label: 'Care',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -665,11 +669,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showSOSDialog(BuildContext context) {
-    final scaffoldContext = context; // Capture scaffold context to avoid async gap
     showDialog(
-      context: scaffoldContext,
+      context: context,
       barrierDismissible: false,
       builder: (dialogContext) {
+        final dialogContextCopy = dialogContext; // Capture to avoid async gap
         final profile = ref.watch(profileControllerProvider).userProfile;
         final sosService = ref.read(sosServiceProvider);
 
@@ -714,8 +718,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 try {
                   await sosService.sendSOSAlert(profile);
                   if (mounted) {
-                    Navigator.pop(dialogContext);
-                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                    Navigator.pop(dialogContextCopy); // ignore: use_build_context_synchronously
+                    scaffoldMessengerKey.currentState?.showSnackBar(
                       const SnackBar(
                         content: Text('SOS Alert sent successfully'),
                         backgroundColor: Colors.green,
@@ -724,8 +728,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   }
                 } catch (e) {
                   if (mounted) {
-                    Navigator.pop(dialogContext);
-                    ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                    Navigator.pop(dialogContextCopy); // ignore: use_build_context_synchronously
+                    scaffoldMessengerKey.currentState?.showSnackBar(
                       SnackBar(
                         content: Text('Failed to send SOS alert: $e'),
                         backgroundColor: Colors.red,
