@@ -11,46 +11,46 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _fullNameController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final fullNameController = TextEditingController();
 
-  bool _isLoading = false;
-  bool _isSignUp = false;
+  bool isLoading = false;
+  bool isSignUp = false;
 
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+  late AnimationController animationController;
+  late Animation<double> fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
+    animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(
+    fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
-      parent: _animationController,
+      parent: animationController,
       curve: Curves.easeInOut,
     ));
 
     // Pre-fill with demo credentials for easy testing
-    _emailController.text = 'abcd@gmail.com';
-    _passwordController.text = '123456789';
-    _fullNameController.text = 'Demo User';
+    emailController.text = 'abcd@gmail.com';
+    passwordController.text = '123456789';
+    fullNameController.text = 'Demo User';
 
-    _animationController.forward();
+    animationController.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _fullNameController.dispose();
+    animationController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    fullNameController.dispose();
     super.dispose();
   }
 
@@ -74,12 +74,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           ),
         ),
         child: FadeTransition(
-          opacity: _fadeAnimation,
+          opacity: fadeAnimation,
           child: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
               child: Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -122,7 +122,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                     // Welcome Text
                     Text(
-                      _isSignUp ? 'Create Account' : 'Welcome Back',
+                      isSignUp ? 'Create Account' : 'Welcome Back',
                       style: textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurface,
@@ -130,7 +130,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      _isSignUp
+                      isSignUp
                           ? 'Join us to start your wellness journey'
                           : 'Sign in to continue your wellness journey',
                       style: textTheme.bodyLarge?.copyWith(
@@ -141,9 +141,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     const SizedBox(height: 32),
 
                     // Full Name Field (only for sign up)
-                    if (_isSignUp) ...[
+                    if (isSignUp) ...[
                       _buildTextField(
-                        controller: _fullNameController,
+                        controller: fullNameController,
                         label: 'Full Name',
                         hint: 'Enter your full name',
                         icon: Icons.person,
@@ -159,7 +159,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                     // Email Field
                     _buildTextField(
-                      controller: _emailController,
+                      controller: emailController,
                       label: 'Email',
                       hint: 'Enter your email',
                       icon: Icons.email,
@@ -181,7 +181,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                     // Password Field
                     _buildTextField(
-                      controller: _passwordController,
+                      controller: passwordController,
                       label: 'Password',
                       hint: 'Enter your password',
                       icon: Icons.lock,
@@ -204,7 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleAuth,
+                        onPressed: isLoading ? null : _handleAuth,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.primary,
                           foregroundColor: colorScheme.onPrimary,
@@ -214,12 +214,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           elevation: 4,
                           shadowColor: colorScheme.shadow.withValues(alpha: 0.3),
                         ),
-                        child: _isLoading
+                        child: isLoading
                             ? const CircularProgressIndicator(
                                 color: Colors.white,
                               )
                             : Text(
-                                _isSignUp ? 'Create Account' : 'Sign In',
+                                isSignUp ? 'Create Account' : 'Sign In',
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -234,12 +234,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       child: TextButton(
                         onPressed: () {
                           setState(() {
-                            _isSignUp = !_isSignUp;
-                            _formKey.currentState?.reset();
+                            isSignUp = !isSignUp;
+                            formKey.currentState?.reset();
                           });
                         },
                         child: Text(
-                          _isSignUp
+                          isSignUp
                               ? 'Already have an account? Sign In'
                               : "Don't have an account? Sign Up",
                           style: textTheme.bodyMedium?.copyWith(
@@ -358,17 +358,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   }
 
   Future<void> _handleAuth() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() => isLoading = true);
 
     try {
       final authService = ref.read(authServiceProvider);
 
       final success = await authService.login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-        _fullNameController.text.trim(),
+        emailController.text.trim(),
+        passwordController.text.trim(),
+        fullNameController.text.trim(),
       );
 
       if (success && mounted) {
@@ -379,7 +379,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                _isSignUp
+                isSignUp
                     ? 'Failed to create account. Please try again.'
                     : 'Invalid email or password.',
               ),
@@ -399,7 +399,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => isLoading = false);
       }
     }
   }

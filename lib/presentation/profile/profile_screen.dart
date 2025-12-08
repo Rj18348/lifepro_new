@@ -11,58 +11,56 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  late TextEditingController _fullNameController;
-  late TextEditingController _authEmailController;
-  late TextEditingController _phoneController;
+  late TextEditingController fullNameController;
+  late TextEditingController authEmailController;
+  late TextEditingController phoneController;
 
-  String? _authEmail;
+  String? authEmail;
 
-  bool _isEditing = false;
+  bool isEditing = false;
 
   @override
   void initState() {
     super.initState();
     final profileState = ref.read(profileControllerProvider);
-    _fullNameController = TextEditingController(text: profileState.userProfile.fullName);
-    _phoneController = TextEditingController(text: profileState.userProfile.phoneNumber);
-    _loadAuthData();
+    fullNameController = TextEditingController(text: profileState.userProfile.fullName);
+    phoneController = TextEditingController(text: profileState.userProfile.phoneNumber);
+    loadAuthData();
   }
 
-  Future<void> _loadAuthData() async {
+  Future<void> loadAuthData() async {
     final authService = ref.read(authServiceProvider);
-    _authEmail = await authService.getCurrentUserEmail();
-    if (_authEmail != null) {
-      _authEmailController = TextEditingController(text: _authEmail);
-      setState(() {}); // Update UI when auth data is loaded
-    }
+    authEmail = await authService.getCurrentUserEmail();
+    authEmailController = TextEditingController(text: authEmail ?? 'No email available');
+    setState(() {}); // Update UI when auth data is loaded
   }
 
   @override
   void dispose() {
-    _fullNameController.dispose();
-    _authEmailController.dispose();
-    _phoneController.dispose();
+    fullNameController.dispose();
+    authEmailController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
-  void _toggleEditMode() {
-    setState(() => _isEditing = true);
+  void toggleEditMode() {
+    setState(() => isEditing = true);
   }
 
-  void _cancelEdit() {
+  void cancelEdit() {
     // Reset form values from controller
     final profileState = ref.read(profileControllerProvider);
-    _fullNameController.text = profileState.userProfile.fullName;
-    _authEmailController.text = _authEmail ?? '';
-    _phoneController.text = profileState.userProfile.phoneNumber;
+    fullNameController.text = profileState.userProfile.fullName;
+    authEmailController.text = authEmail ?? '';
+    phoneController.text = profileState.userProfile.phoneNumber;
 
-    setState(() => _isEditing = false);
+    setState(() => isEditing = false);
   }
 
-  Future<void> _saveProfile() async {
+  Future<void> saveProfile() async {
     final profileController = ref.read(profileControllerProvider.notifier);
     await profileController.saveProfile();
-    setState(() => _isEditing = false);
+    setState(() => isEditing = false);
   }
 
   @override
@@ -76,14 +74,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Profile' : 'Profile'),
+        title: Text(isEditing ? 'Edit Profile' : 'Profile'),
         elevation: 0,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         actions: [
-          if (!_isEditing)
+          if (!isEditing)
             TextButton.icon(
-              onPressed: _toggleEditMode,
+              onPressed: toggleEditMode,
               icon: const Icon(Icons.edit),
               label: const Text('Edit'),
               style: TextButton.styleFrom(
@@ -117,7 +115,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   const SizedBox(height: 24),
 
                   // Welcome Text
-                  if (!_isEditing)
+                  if (!isEditing)
                     Column(
                       children: [
                         Text(
@@ -141,7 +139,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
 
                   // Basic Details Section
-                  if (_isEditing)
+                  if (isEditing)
                     Container(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -168,19 +166,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _ProfileField(
                     label: 'Full Name',
                     icon: Icons.person,
-                    controller: _fullNameController,
+                    controller: fullNameController,
                     errorText: profileState.fieldErrors?['fullName'],
                     hint: 'Enter your full name',
                     onChanged: profileController.updateFullName,
                     keyboardType: TextInputType.name,
-                    readOnly: !_isEditing,
+                    readOnly: !isEditing,
                   ),
                   _ProfileField(
                     label: 'Email',
                     icon: Icons.email,
-                    controller: _authEmailController,
+                    controller: authEmailController,
                     errorText: null,
-                    hint: _authEmail ?? 'No email available',
+                    hint: authEmail ?? 'No email available',
                     onChanged: (value) {},
                     keyboardType: TextInputType.emailAddress,
                     readOnly: true,
@@ -229,15 +227,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _ProfileField(
                     label: 'Phone Number',
                     icon: Icons.phone,
-                    controller: _phoneController,
+                    controller: phoneController,
                     errorText: profileState.fieldErrors?['phone'],
                     hint: 'Enter your phone number',
                     onChanged: profileController.updatePhone,
                     keyboardType: TextInputType.phone,
-                    readOnly: !_isEditing,
+                    readOnly: !isEditing,
                   ),
 
-                  if (_isEditing) ...[
+                  if (isEditing) ...[
                     const SizedBox(height: 40),
 
                     // Action Buttons
@@ -245,7 +243,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: _cancelEdit,
+                            onPressed: cancelEdit,
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
@@ -259,7 +257,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: profileController.isFormValid
-                                ? _saveProfile
+                                ? saveProfile
                                 : null,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
